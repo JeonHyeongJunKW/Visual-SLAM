@@ -5,7 +5,7 @@
 
 ## Step 1 :  데이터셋에서 ORB feature 추출 및 Keyframe 인지
 데이터셋 : KITTI dataset중에서 0번의 왼쪽카메라 데이터셋 사용 
-- VisualizeOdometry.cpp : 실제 정답 Odometry를 시각화합니다. 주의) 행의 좌표는 확대해서 그립니다.
+- VisualizeOdometry.cpp : 실제 정답 Odometry를 시각화합니다. 주의) 행의 좌표는 확대해서 그립니다.(21-12-16)
 
 <img width ="600" src="https://user-images.githubusercontent.com/63538314/146316571-60f79765-8e3e-4506-af88-35fc96511184.gif">
 

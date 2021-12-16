@@ -46,4 +46,4 @@ data[row*map_image.cols + col] = Vec3b(0,0,255);
 
 ## step 6 : loop closing 인지/ DBOW 유지및 관리 [형준], loop closing 수행(Essential graph 최적화)[찬혁]
 
-#1차 목표기간 :  6주
+# 1차 목표기간 :  6주

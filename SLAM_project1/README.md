@@ -9,6 +9,7 @@
 
 <img width ="600" src="https://user-images.githubusercontent.com/63538314/146316571-60f79765-8e3e-4506-af88-35fc96511184.gif">
 
+###코드
 ``` c++
 //이미지 크기 결정
 int image_width = (int)(max_point_x- min_point_x+20);//좌우로 10칸씩 추가하였다. 

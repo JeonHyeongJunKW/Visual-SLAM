@@ -1,5 +1,5 @@
 # Visual-SLAM
-본 repository는 이미지 기반의 SLAM을 위한 튜토리얼 코드
+본 repository는 이미지 기반의 SLAM을 위한 튜토리얼 코드입니다
 * * *
 
 ## Homography_tutorial

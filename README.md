@@ -13,4 +13,4 @@
 카메라의 내계파라미터 및 체스보드 캡쳐 코드 
 
 ## SLAM_project1 
-ORB SLAM 직접구현
+ORB SLAM 직접구현 with 김찬혁2

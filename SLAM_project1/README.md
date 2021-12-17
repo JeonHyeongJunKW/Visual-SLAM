@@ -40,6 +40,7 @@ data[row*map_image.cols + col] = Vec3b(0,0,255);
 ## Step 4 : Essential graph 구현 [찬혁]
 구현내용 : 
   - Covisibility graph에 추가로 spanning tree를 만들고, Covisibility간에 약한건 지움
+
 ## step 5 : local BA 구현 [찬혁]
 구현내용 : 
   - Covisibility graph내에서 새로운 key Frame 추가간에 노드 정보 유지 
@@ -47,3 +48,6 @@ data[row*map_image.cols + col] = Vec3b(0,0,255);
 ## step 6 : loop closing 인지/ DBOW 유지및 관리 [형준], loop closing 수행(Essential graph 최적화)[찬혁]
 
 # 1차 목표기간 :  6주
+
+# Update
+-21/12/17 - Node폴더 아래에 KeyFrame 및 MapPoint class 선언  

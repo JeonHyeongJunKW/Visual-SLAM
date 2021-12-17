@@ -23,11 +23,13 @@ class KeyFrame
 
     KeyFrame* _pkeyframe_Fatherkeyframe;//이 키프레임의 이전 키프레임의 포인터입니다. 키프레임간에 유사도 검사등에 사용됩니다.
     KeyFrame* _pkeyframe_Childkeyframe;//이 키프레임의 다음 키프레임의 포인터입니다. 키프레임간에 유사도 검사등에 사용됩니다.
+    float* _pf_camera_R_t;
 
   public: //constructor method
     KeyFrame(int arg_KeyIndex);
     KeyFrame(int arg_KeyIndex, Mat arg_IntrinsicParam);
     KeyFrame(int arg_KeyIndex, Mat arg_IntrinsicParam, Mat arg_OriginImage);
+    KeyFrame(int arg_KeyIndex, Mat arg_IntrinsicParam, Mat arg_OriginImage,float* arg_camera_R_t);
 
   public: //method
     //Intrinsic Parameter
@@ -35,7 +37,7 @@ class KeyFrame
     Mat Get_IntrinsicParam(void); // 키프레임의 현재 내계 파라미터를 반환합니다.
 
     //Origin Image
-    void Set_OriginImage(Mat arg_OriginImagee); // 키프레임의 원본이미지를 바꿉니다.
+    void Set_OriginImage(Mat arg_OriginImage); // 키프레임의 원본이미지를 바꿉니다.
     Mat Get_OriginImage(void); // 키프레임의 원본이미지를 가져옵니다.
 
     //Key Index
@@ -43,7 +45,9 @@ class KeyFrame
 
     //neighbor keyFrame
     KeyFrame* Get_FatherKeyFrame(void);//부모 키프레임을 반환합니다.
+    void Set_FatherKeyFrame(KeyFrame* arg_FatherFrame);//부모 키프레임을 반환합니다.
     KeyFrame* Get_ChildKeyFrame(void);//자식 키프레임을 반환합니다.
+    void Set_ChildKeyFrame(KeyFrame* arg_ChildFrame);//부모 키프레임을 반환합니다.
     
     //MapPoint
     void Make_MapPoint();//기존에 가지고 있던 원본이미지에서 맵포인트를 만듭니다.

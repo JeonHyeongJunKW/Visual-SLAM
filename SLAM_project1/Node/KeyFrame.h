@@ -9,8 +9,8 @@ class MapPoint
 {
   public:
     Point3f p3f_coordinate;//3차원점을 가지고 있습니다. 
-    vector<KeyFrame*> vec_pt_ObservedKeyFrame; //해당 map point가 포함된 keyframe들
-    map<KeyFrame*,int> map_pointInd; //map point가 소속된 키프레임에서 해당 map point의 인덱스
+    vector<int> vec_pt_ObservedKeyFrame; //해당 map point가 포함된 keyframe들
+    map<int,int> map_pointInd; //map point가 소속된 키프레임에서 해당 map point의 인덱스
 };
 
 class KeyFrame
@@ -23,7 +23,7 @@ class KeyFrame
 
     KeyFrame* _pkeyframe_Fatherkeyframe;//이 키프레임의 이전 키프레임의 포인터입니다. 키프레임간에 유사도 검사등에 사용됩니다.
     KeyFrame* _pkeyframe_Childkeyframe;//이 키프레임의 다음 키프레임의 포인터입니다. 키프레임간에 유사도 검사등에 사용됩니다.
-    float* _pf_camera_R_t;
+    float* _pf_camera_R_t;//12개의 파라미터이다.[R | T]가 행단위로 들어가 있다. 
 
   public: //constructor method
     KeyFrame(int arg_KeyIndex);

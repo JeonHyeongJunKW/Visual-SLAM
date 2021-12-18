@@ -87,12 +87,12 @@ void KeyFrame::Make_MapPoint()//새로 맵포인트를 만듭니다.
   this->_pmappoint_OwnedMapPoint.clear();
   //1. 현재 이미지에서 feature를 뽑습니다. 
   //2. 그중에서 적당한 임계값을 가지는 OrbFeature를 뽑습니다. 
-  //3. 이것을  
+  //3. 이것을 이전에 노드들과 비교합니다. 
+  //4. 이전 노드와 가진게 비슷한지도 비교합니다. 
 }
 
 void KeyFrame::Make_MapPoint(Mat arg_OriginImage)//새로 인자로 들어온 이미지를 가지고 맵포인트를 만듭니다.
 {
   this->_mat_Originimage = arg_OriginImage.clone();
   this->_pmappoint_OwnedMapPoint.clear();
-
 }

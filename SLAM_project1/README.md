@@ -3,23 +3,16 @@
 ## 목표 
 : 모노 카메라 기반의 SLAM구현 
 
-## Step 1 :  데이터셋에서 ORB feature 추출 및 Keyframe 인지
+## Step 1 :  데이터셋에서 ORB feature 추출 및 Keyframe 인지[형준]
 데이터셋 : KITTI dataset중에서 0번의 왼쪽카메라 데이터셋 사용 
 - VisualizeOdometry.cpp : 실제 정답 Odometry를 시각화합니다. 주의) 행의 좌표는 확대해서 그립니다.(21-12-16)
 
 <img width ="600" src="https://user-images.githubusercontent.com/63538314/146316571-60f79765-8e3e-4506-af88-35fc96511184.gif">
 
-### code
-``` c++
-//이미지 크기 결정
-int image_width = (int)(max_point_x- min_point_x+20);//좌우로 10칸씩 추가하였다. 
-int image_height = (int)(max_point_y - min_point_y)*10+20;//좌우로 10칸씩 추가하였다. 행은 10배로 늘렸다.
+- LoadGrayImage.cpp : 이미지를 glob으로 읽어서 시각화합니다.(21-12-18)
 
-//이미지 픽셀 수정하기 
-int col = 10+(points[i].x-min_point_x);//위쪽 10칸
-int row = 10+((points[i].y-min_point_y))*10;//왼쪽 10칸씩 추가 행은 10배로 늘렸다.
-data[row*map_image.cols + col] = Vec3b(0,0,255);
-``` 
+- KeyFrameMaker.cpp : 이미지를 glob으로 읽어와서 orb feature를 뽑습니다. 그후에 키프레임으로 적합한지 검사합니다.(미완)(21-12-19)
+
 ### KeyFrame이 가진 정보 [형준]
 - 카메라 포즈 및 내부 파라미터
 - 해당 프레임이 가진 orb feature list
@@ -40,7 +33,6 @@ data[row*map_image.cols + col] = Vec3b(0,0,255);
 ## Step 4 : Essential graph 구현 [찬혁]
 구현내용 : 
   - Covisibility graph에 추가로 spanning tree를 만들고, Covisibility간에 약한건 지움
-
 ## step 5 : local BA 구현 [찬혁]
 구현내용 : 
   - Covisibility graph내에서 새로운 key Frame 추가간에 노드 정보 유지 
@@ -48,6 +40,3 @@ data[row*map_image.cols + col] = Vec3b(0,0,255);
 ## step 6 : loop closing 인지/ DBOW 유지및 관리 [형준], loop closing 수행(Essential graph 최적화)[찬혁]
 
 # 1차 목표기간 :  6주
-
-# Update
--21/12/17 - Node폴더 아래에 KeyFrame 및 MapPoint class 선언  

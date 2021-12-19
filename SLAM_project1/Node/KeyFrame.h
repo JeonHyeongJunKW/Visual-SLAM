@@ -1,3 +1,4 @@
+#pragma once
 #include <iostream>
 #include <opencv2/opencv.hpp>
 
@@ -8,8 +9,10 @@ using namespace cv;
 class MapPoint
 {
   public:
-    Point3f p3f_coordinate;//3차원점을 가지고 있습니다. 
-    vector<int> vec_pt_ObservedKeyFrame; //해당 map point가 포함된 keyframe들
+    float* p3f_coordinate;//3차원점을 가지고 있습니다. 
+    Mat mat_Orbdescirptor;// 해당 맵포인트가 가진 Orb descriptor 정보입니다.1x32 크기입니다.
+    vector<int> vec_pt_ObservedKeyFrame; //해당 map point가 포함된 키프레임들
+    map<int,KeyPoint> map_KeyPointInKeyFrame;//map point가 포함된 키프레임에서의 키포인트 정보 
     map<int,int> map_pointInd; //map point가 소속된 키프레임에서 해당 map point의 인덱스
 };
 

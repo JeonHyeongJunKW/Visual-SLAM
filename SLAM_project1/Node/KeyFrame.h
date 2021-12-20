@@ -11,6 +11,9 @@ class MapPoint
   public:
     float* p3f_coordinate;//3차원점을 가지고 있습니다. 
     Mat mat_Orbdescirptor;// 해당 맵포인트가 가진 Orb descriptor 정보입니다.1x32 크기입니다.
+    int int_Node;
+
+
     vector<int> vec_pt_ObservedKeyFrame; //해당 map point가 포함된 키프레임들
     map<int,KeyPoint> map_KeyPointInKeyFrame;//map point가 포함된 키프레임에서의 키포인트 정보 
     map<int,int> map_pointInd; //map point가 소속된 키프레임에서 해당 map point의 인덱스
@@ -51,11 +54,9 @@ class KeyFrame
     void Set_FatherKeyFrame(KeyFrame* arg_FatherFrame);//부모 키프레임을 반환합니다.
     KeyFrame* Get_ChildKeyFrame(void);//자식 키프레임을 반환합니다.
     void Set_ChildKeyFrame(KeyFrame* arg_ChildFrame);//부모 키프레임을 반환합니다.
-    
-    //MapPoint
-    void Make_MapPoint();//기존에 가지고 있던 원본이미지에서 맵포인트를 만듭니다.
-    void Make_MapPoint(Mat arg_OriginImage);//지우고 인자로 받은 이미지에서 맵포인트를 만듭니다. 
 
     vector<MapPoint*> Get_MapPoint(); // 현재 키프레임이 가지고 있는 맵포인트를 반환합니다. 
     int Get_NumMapPoint(); //현재 가지고 있는 맵포인트 
+
+    void Add_MapPoint(MapPoint* arg_MapPoint);//키프레임에 맵포인트를 추가합니다. 
 };

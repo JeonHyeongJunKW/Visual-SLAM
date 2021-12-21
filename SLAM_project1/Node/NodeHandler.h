@@ -13,7 +13,7 @@ class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다.
     vector<KeyFrame*> _pt_KeyFrames;
     
     Ptr<DescriptorMatcher> _match_OrbMatchHandle = BFMatcher::create(NORM_HAMMING);
-    Mat _full_descirptor;//전체 descriptor입니다. 
+    Mat _full_descriptor;//전체 descriptor입니다. 
     int int_CurrentFrameIdx = 0;
     int int_LastKeyFrameIdx = -1;
     bool _b_IsSetInstricParam= false;
@@ -42,4 +42,5 @@ class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다.
     bool Delete_MapPoint(MapPoint* arg_ptMapPoint);// 맵포인트를 삭제합니다.
     bool Is_GoodKeyFrame(Mat arg_candidateImage);
     int Get_MapPointSize(void); // 맵포인트의 사이즈를 반환합니다.
+    bool Make_MapPoint_pix2pixMatch(Mat arg_descriptor,vector<KeyPoint> arg_KeyPoint, KeyFrame arg_KeyFrame);
 };

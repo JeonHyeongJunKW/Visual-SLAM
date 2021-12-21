@@ -10,7 +10,7 @@ class MapPoint
 {
   public:
     float* p3f_coordinate;//3차원점을 가지고 있습니다. 
-    Mat mat_Orbdescirptor;// 해당 맵포인트가 가진 Orb descriptor 정보입니다.1x32 크기입니다.
+    Mat mat_Orbdescriptor;// 해당 맵포인트가 가진 Orb descriptor 정보입니다.1x32 크기입니다.
     int int_Node;
 
 

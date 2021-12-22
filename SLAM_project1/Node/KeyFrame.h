@@ -29,7 +29,7 @@ class KeyFrame
 
     KeyFrame* _pkeyframe_Fatherkeyframe;//이 키프레임의 이전 키프레임의 포인터입니다. 키프레임간에 유사도 검사등에 사용됩니다.
     KeyFrame* _pkeyframe_Childkeyframe;//이 키프레임의 다음 키프레임의 포인터입니다. 키프레임간에 유사도 검사등에 사용됩니다.
-    float* _pf_camera_R_t;//12개의 파라미터이다.[R | T]가 행단위로 들어가 있다. 
+    float* _pf_camera_R_t;//12개의 파라미터이다.[R | T]가 행단위로 들어가 있다. 추가로 마지막 성분으로 스케일이 들어간다.
 
   public: //constructor method
     KeyFrame(int arg_KeyIndex);
@@ -59,4 +59,5 @@ class KeyFrame
     int Get_NumMapPoint(); //현재 가지고 있는 맵포인트 
 
     void Add_MapPoint(MapPoint* arg_MapPoint);//키프레임에 맵포인트를 추가합니다. 
+    
 };

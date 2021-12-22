@@ -9,6 +9,8 @@
 
 <img width ="600" src="https://user-images.githubusercontent.com/63538314/146316571-60f79765-8e3e-4506-af88-35fc96511184.gif">
 
+# 긴급수정 : 함수내에 지역변수의 포인터를 저장하여 에러발생. 클래스내의 변수로 수정중
+
 - LoadGrayImage.cpp : 이미지를 glob으로 읽어서 시각화합니다.(21-12-18)
 
 - KeyFrameMaker.cpp : 이미지를 glob으로 읽어와서 orb feature를 뽑습니다. 

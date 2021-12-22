@@ -8,7 +8,7 @@ int main(int argc, char** argv)
 {
   vector<cv::String> file_names;
   glob("/media/jeon/T7/Kitti dataset/data_odometry_gray/dataset/sequences/00/image_0/*.png", file_names, false);
-  NodeHandler nodehandler;
+  NodeHandler nodehandler(10);
   nodehandler.Set_InstricParam(718.856,718.856,0.00,607.1928,185.2157);
   for(int camera_ind=0; camera_ind<file_names.size(); camera_ind++)
   {

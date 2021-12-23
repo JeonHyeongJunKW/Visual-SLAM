@@ -5,8 +5,7 @@
 OpenCV를 사용하여 입력 값들을 점그래프로 나타내는 코드
 
 ## OpenGL
-OpenGL 동작 테스트  
-OpenGL, GLEW, GLU, GLFW를 사용함  
+OpenGL 동작 테스트. OpenGL, GLEW, GLU, GLFW를 사용함  
 빨간색 OpenGL Window를 생성함  
 <img width = "250" src="https://user-images.githubusercontent.com/52673977/147186710-8873f449-b606-46d3-a40d-65da2dc335ce.png">
 

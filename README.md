@@ -14,3 +14,7 @@
 
 ## SLAM_project1 
 ORB SLAM 직접구현 with 김찬혁2
+
+## ceres_tutorial
+ceres를 사용하여 노이즈가 포함된 데이터의 값을 추정
+튜토리얼 또는 튜토리얼을 기반으로 작성한 코드

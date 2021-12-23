@@ -57,11 +57,6 @@ void ExtractPoint2D(char* filename, vector<Point2f> &extracted_point2d, int &ima
 
 int main(int argc, char** argv)
 {
-  // if(argc <2)
-  // {
-  //   cout<<"the number of argument is " <<argc<<endl;
-  //   return 0;
-  // }
   char filename[] = "/media/jeon/T7/Kitti dataset/data_odometry_poses/dataset/poses/00.txt";
   vector<Point2f> point2d;
   int image_width;
@@ -71,7 +66,7 @@ int main(int argc, char** argv)
   ExtractPoint2D(filename,point2d, image_width, image_height, min_point_x,min_point_y);//file 정보 및 이미지의 높이를 가져온다.
   vector<cv::String> file_names;
   glob("/media/jeon/T7/Kitti dataset/data_odometry_gray/dataset/sequences/00/image_0/*.png", file_names, false);
-  NodeHandler nodehandler(10);
+  NodeHandler nodehandler(20,30);
   nodehandler.Set_InstricParam(718.856,718.856,0.00,607.1928,185.2157);
   Mat map_image = Mat(image_height,image_width,CV_8UC3,Scalar(255,255,255));
   Vec3b* data = (Vec3b*)map_image.data;
@@ -82,11 +77,12 @@ int main(int argc, char** argv)
 
     int col = 10+(point2d[camera_ind].x-min_point_x);
     int row = 10+((point2d[camera_ind].y-min_point_y))*10;
-    
+    clock_t start = clock();
     if(b_IsGoodKeyFrame)
     {//키프레임을 삽입하고, 맵포인트를 등록합니다.
       nodehandler.Make_KeyFrame(candidate_image);
       circle(map_image,Point(col,row),3,Scalar(0,0,255),1,8,0);
+      cout<< (double)(clock()-start)/CLOCKS_PER_SEC<<"초"<<endl;
       // data[row*map_image.cols + col] = Vec3b(0,0,255);
     }
     else
@@ -95,6 +91,7 @@ int main(int argc, char** argv)
       // circle(map_image,Point(col,row),1,Scalar(0,255,0),1,8,0);
     }
     imshow("map image",map_image);
+    
     waitKey(1);
   }
 }

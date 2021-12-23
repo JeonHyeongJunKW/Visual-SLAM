@@ -9,8 +9,6 @@ using namespace cv;
 class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다. 
 {
   private://variable
-    //TODO
-    //오늘 수정할 부분
     //비교하는 부분을 윈도우를 만들어서 그걸로 비교하자.
     vector<MapPoint*> _pt_MapPoints;//전체 맵포인트가 들어있습니다.
     vector<KeyFrame*> _pt_KeyFrames;//전체 키프레임이 담겨있습니다. 
@@ -54,7 +52,7 @@ class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다.
     bool Delete_MapPoint(MapPoint* arg_ptMapPoint);// 맵포인트를 삭제합니다.
     bool Is_GoodKeyFrame(Mat arg_candidateImage);
     int Get_MapPointSize(void); // 맵포인트의 사이즈를 반환합니다.
-    bool Make_MapPoint_pix2pixMatch(Mat arg_descriptor,vector<KeyPoint> arg_KeyPoint, KeyFrame arg_KeyFrame);
+    bool Make_MapPoint_pix2pixMatch(Mat arg_descriptor,vector<KeyPoint> arg_KeyPoint, KeyFrame* arg_KeyFrame);
     void Change_Window(KeyFrame* arg_NewKeyFrame);
     void Delete_Descriptor(int arg_delIdx);
 };

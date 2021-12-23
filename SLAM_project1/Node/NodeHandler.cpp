@@ -46,8 +46,11 @@ void NodeHandler::Delete_Descriptor(int arg_delIdx)
   int int_LocalReturnRowSize = this->_mat_LocalDescriptor.rows-1;
   int int_DescriptorSize =32;
   Mat return_Descriptor(int_LocalReturnRowSize,int_DescriptorSize,CV_8UC1);
-  this->_mat_LocalDescriptor(Rect(0,0,int_DescriptorSize,arg_delIdx-1)).copyTo(return_Descriptor(Rect(0,0,int_DescriptorSize,arg_delIdx-1)));
-  this->_mat_LocalDescriptor(Rect(0,arg_delIdx+1,int_LocalReturnRowSize-arg_delIdx,1)).copyTo(return_Descriptor(Rect(0,arg_delIdx,int_LocalReturnRowSize-arg_delIdx,1)));
+  if(arg_delIdx !=0)
+  {
+    this->_mat_LocalDescriptor(Rect(0,0,int_DescriptorSize,arg_delIdx)).copyTo(return_Descriptor(Rect(0,0,int_DescriptorSize,arg_delIdx)));
+  }
+  this->_mat_LocalDescriptor(Rect(0,arg_delIdx+1,int_DescriptorSize,int_LocalReturnRowSize-arg_delIdx)).copyTo(return_Descriptor(Rect(0,arg_delIdx,int_DescriptorSize,int_LocalReturnRowSize-arg_delIdx)));
   this->_mat_LocalDescriptor = return_Descriptor;//갱신
 }
 void NodeHandler::Change_Window(KeyFrame* arg_NewKeyFrame)
@@ -57,10 +60,6 @@ void NodeHandler::Change_Window(KeyFrame* arg_NewKeyFrame)
   if(int_Current_LocalSize>=20)
   {
     this->_pt_LocalWindowKeyFrames.push_back(arg_NewKeyFrame);
-    for(auto tet =this->_pt_LocalWindowKeyFrames.begin(); tet !=_pt_LocalWindowKeyFrames.end();tet++ )
-    {
-      cout<<"프레임 번호 : "<<(*tet)->Get_KeyIndex()<<endl;
-    }
     //맨앞의 키프레임을 제거해야한다.
     //해당 키프레임들에 해당하는 맵포인트들을 재구성한다. 
     KeyFrame* kfp_ErasedKeyFrame = *_pt_LocalWindowKeyFrames.begin();
@@ -71,7 +70,6 @@ void NodeHandler::Change_Window(KeyFrame* arg_NewKeyFrame)
     for(int i=0; i<mps_ErasedMapPoint.size(); i++)
     {
       vector<int> checked_Frame = (mps_ErasedMapPoint[i])->vec_pt_ObservedKeyFrame;
-      
       bool Is_using= false;
       int using_Frame_number =0;
       for(int j=0; j<checked_Frame.size(); j++)
@@ -92,11 +90,9 @@ void NodeHandler::Change_Window(KeyFrame* arg_NewKeyFrame)
         auto it = find(lmp.begin(),lmp.end(),mps_ErasedMapPoint[i]);
         if(it !=lmp.end())
         {
-          // cout<<"지울값을 찾았습니다."<<endl;
           int delete_index = it-lmp.begin();//지울 인덱스 번호 
           lmp.erase(lmp.begin()+delete_index);//안쓰이는 맵포인트를 제거 
-          //행을 삭제합니다.
-          Delete_Descriptor(delete_index);
+          Delete_Descriptor(delete_index);//해당 인덱스에 해당하는 맵포인트를 제거합니다...
           delete_count++;
         }
       }
@@ -107,27 +103,27 @@ void NodeHandler::Change_Window(KeyFrame* arg_NewKeyFrame)
           // {
               
           // }
-          cout<<"해당 맵포인트가 관측되는 프레임의 갯수"<<checked_Frame.size()<<endl;//관측되는 프레임 수 
-          cout<<"아직 사용중입니다. 사용중인 프레임이름"<<using_Frame_number<<endl;
+          // cout<<"해당 맵포인트가 관측되는 프레임의 갯수"<<checked_Frame.size()<<endl;//관측되는 프레임 수 
+          // cout<<"아직 사용중입니다. 사용중인 프레임이름"<<using_Frame_number<<endl;
         }
         
       }
     }
-    cout<<"지워지는 프레임 번호 : "<<kfp_ErasedKeyFrame->Get_KeyIndex()<<endl;
-    cout<<"현재 최소 프레임 :"<<minimum_keyframe_index<<", 지워지는 맵포인트 수 : "<<delete_count<<endl;
+    // cout<<"지워지는 프레임 번호 : "<<kfp_ErasedKeyFrame->Get_KeyIndex()<<endl;
+    // cout<<"현재 최소 프레임 :"<<minimum_keyframe_index<<", 지워지는 맵포인트 수 : "<<delete_count<<endl;
 
     
   }
   else
   {
     _pt_LocalWindowKeyFrames.push_back(arg_NewKeyFrame);
-    for(auto tet =this->_pt_LocalWindowKeyFrames.begin(); tet !=_pt_LocalWindowKeyFrames.end();tet++ )
-    {
-      cout<<"프레임 번호 : "<<(*tet)->Get_KeyIndex()<<endl;
-    }
+    // for(auto tet =this->_pt_LocalWindowKeyFrames.begin(); tet !=_pt_LocalWindowKeyFrames.end();tet++ )
+    // {
+    //   cout<<"프레임 번호 : "<<(*tet)->Get_KeyIndex()<<endl;
+    // }
   }
 }
-bool NodeHandler::Make_MapPoint_pix2pixMatch(Mat arg_descriptor,vector<KeyPoint> arg_KeyPoint, KeyFrame arg_KeyFrame)
+bool NodeHandler::Make_MapPoint_pix2pixMatch(Mat arg_descriptor,vector<KeyPoint> arg_KeyPoint, KeyFrame* arg_KeyFrame)
 {
   int int_DescriptorSize = 32;
   if(this->Get_MapPointSize()==0)
@@ -159,7 +155,7 @@ bool NodeHandler::Make_MapPoint_pix2pixMatch(Mat arg_descriptor,vector<KeyPoint>
       //전역 키프레임에서의 맵포인트의 인덱스 정보를 등록합니다.
       mp_newPoint->map_pointInd[this->int_CurrentFrameIdx-1] =idx_descriptor;
       //현재 키프레임에 최종적으로 맵포인트의 pointer를 등록합니다. 
-      arg_KeyFrame.Add_MapPoint(mp_newPoint); 
+      arg_KeyFrame->Add_MapPoint(mp_newPoint); 
     }
   }
   else
@@ -205,66 +201,35 @@ bool NodeHandler::Make_MapPoint_pix2pixMatch(Mat arg_descriptor,vector<KeyPoint>
       //키프레임에서의 맵포인트의 인덱스 정보를 등록합니다.
       pt_targetPoint->map_pointInd[this->int_CurrentFrameIdx-1] =idx_descriptor;
       //키프레임에 최종적으로 맵포인트의 pointer를 등록합니다. 
-      arg_KeyFrame.Add_MapPoint(pt_targetPoint); 
+      arg_KeyFrame->Add_MapPoint(pt_targetPoint); 
     }
   }
-  this->_pt_KeyFrames.push_back(&arg_KeyFrame);//최종적으로 현재 키프레임을 등록시킵니다.
-  //+ 로컬프레임에서는 일부를 제거시킵니다. 
-  KeyFrame* pt_newFrame =&arg_KeyFrame;
-  Change_Window(pt_newFrame);
+  Change_Window(arg_KeyFrame);
 }
 
 bool NodeHandler::Make_KeyFrame(Mat arg_KeyFrame)
 {
   //이미지를 받아서 키프레임을 생성합니다. 
-  KeyFrame kf_NewKeyFrame(this->int_CurrentFrameIdx-1, this->_mat_InstrisicParam, arg_KeyFrame);
+  
+  this->_pt_KeyFrames.push_back(new KeyFrame(this->int_CurrentFrameIdx-1, this->_mat_InstrisicParam));
+  KeyFrame* kfp_NewKeyFrame = *(this->_pt_KeyFrames.end()-1);
   //키프레임 노드 생성및 정보를 등록합니다. 
   Mat des;
-  //TODO
-  for(auto tet =this->_pt_LocalWindowKeyFrames.begin(); tet !=_pt_LocalWindowKeyFrames.end();tet++ )
-  {
-    cout<<"키프레임 만들어라 부분 : 프레임 번호 : "<<(*tet)<<endl;
-    // cout<<"키프레임 만들어라 부분 : 프레임 번호 : "<<(*tet)->Get_KeyIndex()<<endl;
-  }
   
   vector<KeyPoint> kp_vector;
   int kp_size = this->_Get_NumberOfOrbFeature(arg_KeyFrame,des,kp_vector);
   //부모키프레임을 등록합니다.
   if(!this->_pt_KeyFrames.empty())//부모키프레임이 존재할 수 있다면(이미 하나정도 저장되어있다면)
   {
-    kf_NewKeyFrame.Set_FatherKeyFrame(*(_pt_KeyFrames.end()-1));
-    (*(_pt_KeyFrames.end()-1))->Set_ChildKeyFrame(&kf_NewKeyFrame);
+    kfp_NewKeyFrame->Set_FatherKeyFrame(*(_pt_KeyFrames.end()-1));
+    (*(_pt_KeyFrames.end()-1))->Set_ChildKeyFrame(kfp_NewKeyFrame);
   }
 
   //<--------------수정해야하는부분(키프레임에 맵포인트를 넣을 때는 한번에 넣을것, 
   //현재 키프레임에 것도 같은걸로 인식 및 knn간에 인덱스가 넘어버리는 문제가 있음
   //knn도 적당하게 임계값을 줄 수 있는 방법 찾을 것)
   //하나씩 추가하는게 아니라 동시에 knn돌려서 찾는게 제일 적합할 수도 있다. 비어있는지 확인하고 
-  if(false)
-  {
-    for(int idx_descriptor =0; idx_descriptor<des.rows; idx_descriptor++)
-    {
-      int int_DescriptorSize =32;
-      Mat test_descriptor = des(Rect(0,idx_descriptor,int_DescriptorSize,1));
-      MapPoint* return_MapPoint;//현재 descriptor를 통해서 맵포인트를 불러온다. 
-      //해당 맵포인트가 없다면, 새로할당한다. 
-      cout<<"키프레임에 삽입되는 맵포인트의 인덱스 : "<<idx_descriptor<<endl;
-      Make_MapPoint(test_descriptor,return_MapPoint);
-      //맵포인트에 현재 프레임을 포함시킵니다.
-      return_MapPoint->vec_pt_ObservedKeyFrame.push_back(this->int_CurrentFrameIdx-1);
-      //키프레임에서의 키포인트정보를 등록합니다.
-      return_MapPoint->map_KeyPointInKeyFrame[this->int_CurrentFrameIdx-1] = kp_vector[idx_descriptor];
-      //키프레임에서의 맵포인트의 인덱스 정보를 등록합니다.
-      return_MapPoint->map_pointInd[this->int_CurrentFrameIdx-1] =idx_descriptor;
-      //키프레임에 최종적으로 맵포인트의 pointer를 등록합니다. 
-      kf_NewKeyFrame.Add_MapPoint(return_MapPoint);
-    }
-    
-  }
-  else
-  {
-    this->Make_MapPoint_pix2pixMatch(des,kp_vector,kf_NewKeyFrame);
-  }
+  this->Make_MapPoint_pix2pixMatch(des,kp_vector,kfp_NewKeyFrame);
     
   return true;
 }
@@ -315,11 +280,9 @@ bool NodeHandler::Is_GoodKeyFrame(Mat arg_candidateImage)
   if (no_tracking_point.size() <= (int)(des.rows*0.1))//10프로 이상의 점들이 처음보는 점들이어야함.
   {
     // cout<<"처음 발견하는 점의 수 : "<<no_tracking_point.size()<<"  전체 점의 수 : "<<des.rows<<endl;
-    
     return false;
   }
-  cout<<"현재 유지하고 있는 점의 수 "<<this->Get_MapPointSize()<<" tracking하는 점의 수 :  "<<500-no_tracking_point.size()<<" 마지막으로 넣은 키프레임 인덱스"<<this->int_LastKeyFrameIdx<<endl;
-  // cout<<"처음 발견하는 점의 수 : "<<no_tracking_point.size()<<"  전체 점의 수 : "<<des.rows<<endl;
+  cout<<"현재 유지하고 있는 점의 수 "<<this->_pt_LocalWindowMapPoints.size()<<" tracking하는 점의 수 :  "<<500-no_tracking_point.size()<<" 마지막으로 넣은 키프레임 인덱스"<<this->int_LastKeyFrameIdx<<endl;
   
   this->int_LastKeyFrameIdx = this->int_CurrentFrameIdx-1;
   return true;

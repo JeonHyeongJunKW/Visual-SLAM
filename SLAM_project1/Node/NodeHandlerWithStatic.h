@@ -5,24 +5,6 @@
 
 using namespace std;
 using namespace cv;
-class Match_Set
-{
-  //같은 지점을 본 키포인트 들입니다.
-  public:
-    Match_Set(KeyFrame* arg_FirstFrame,
-              KeyFrame* arg_SecondFrame,
-              KeyPoint* arg_FirstPoint, 
-              KeyPoint* arg_SecondPoint)
-              :kf_first(arg_FirstFrame),
-              kf_second(arg_SecondFrame),
-              kp_first(arg_FirstPoint),
-              kp_second(arg_SecondPoint){}
-    KeyFrame* kf_first;
-    KeyFrame* kf_second;
-    //서로가 본 키포인트 위치입니다. 
-    KeyPoint* kp_first;
-    KeyPoint* kp_second;
-};
 
 class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다. 
 {
@@ -45,7 +27,6 @@ class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다.
     int _int_MapPointIdx = 0;
     int _int_FrameThreshold = 20;
     int _int_LocalWindowSize =20;
-    vector<Match_Set*> _local_MatchSet;
 
   public://constructor 
     NodeHandler();
@@ -64,11 +45,14 @@ class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다.
       _mat_InstrisicParam =(Mat_<float>(3,3) <<arg_f_x,arg_skef_cf_x,arg_c_x,0,arg_f_y,arg_c_y,0,0,1);
       _b_IsSetInstricParam =true;
       }
+    bool Make_KeyFrame(Mat arg_KeyFrame);
+    bool Make_MapPoint(Mat arg_Descriptor, MapPoint* &arg_OutputMapPoint);
+    //맵포인트를 추가합니다. 만약에 이미 유사한 맵포인트가 있다면 해당 맵포인트의 pointer를 반환합니다.
+    bool Add_MapPoint();//
+    bool Delete_MapPoint(MapPoint* arg_ptMapPoint);// 맵포인트를 삭제합니다.
+    bool Is_GoodKeyFrame(Mat arg_candidateImage);
+    int Get_MapPointSize(void); // 맵포인트의 사이즈를 반환합니다.
     bool Make_MapPoint_pix2pixMatch(Mat arg_descriptor,vector<KeyPoint> arg_KeyPoint, KeyFrame* arg_KeyFrame);
-    bool Change_Window(KeyFrame* arg_NewKeyFrame);
-
-    bool ValidateAndAddFrame(Mat arg_candidateImage);
-
-    vector<KeyFrame*> Get_LocalKeyFrame(void);
-
+    void Change_Window(KeyFrame* arg_NewKeyFrame);
+    void Delete_Descriptor(int arg_delIdx);
 };

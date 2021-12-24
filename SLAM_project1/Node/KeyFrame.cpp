@@ -86,3 +86,22 @@ void KeyFrame::Add_MapPoint(MapPoint* arg_MapPoint)
 {
   this->_pmappoint_OwnedMapPoint.push_back(arg_MapPoint);
 }
+
+void KeyFrame::Set_Descriptor(Mat arg_descriptors)
+{
+  this->_mat_descriptors = arg_descriptors;
+}
+
+void KeyFrame::Set_KeyPoint(vector<KeyPoint> arg_keyPoint)
+{
+  this->_vkey_keypoints = arg_keyPoint;
+}
+
+Mat KeyFrame::Get_Descriptor(void)
+{
+  return this->_mat_descriptors;
+}
+vector<KeyPoint> KeyFrame::Get_keyPoint(void)
+{
+  return this->_vkey_keypoints;
+}

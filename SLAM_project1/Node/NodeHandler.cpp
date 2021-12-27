@@ -166,7 +166,8 @@ bool NodeHandler::Change_Window(KeyFrame* arg_NewKeyFrame)
         // cout<<"K1 : "<<this->_pt_LocalWindowKeyFrames.size()<< "max match : "<< max_match<<endl;
         if(max_match<5)
         {
-          cout<<"K1 : "<<this->_pt_LocalWindowKeyFrames.size()<< "max match : "<< max_match<<endl;
+          // cout<<"K1 : "<<this->_pt_LocalWindowKeyFrames.size()<< "max match : "<< max_match<<endl;
+          cout<<"small MapPoint : "<<max_match<<endl;
         }
         // cout<<"버려진 키프레임의 수"<<die_size<<endl;
         return true;

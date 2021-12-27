@@ -27,9 +27,12 @@
   ### 목표 
   - NodeHandlerWithStatic.cpp
     - 기존에 정적인 프레임 수를 저장하는방식입니다.
+    
   - NodeHandler.cpp 
     - 현재 프레임에서 얻은 맵포인트를 포함하는 키프레임(K1)을 로컬맵에서 유지하는 키프레임으로 설정한다. 
     - 현재 프레임과 가장 많은 맵포인트를 공유하는 키프레임(K_ref)를 유지한다. 
+
+  - DBoW2 : 기존의 ORB feaure의 Database 및 Visual word를 사용할 수 있게 하였다. (21-12-27)
     
   <img width ="600" src="https://user-images.githubusercontent.com/63538314/147348554-440c3006-0f46-4c82-a7d3-51ed69bc46b9.gif">
   

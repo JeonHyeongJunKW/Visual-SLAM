@@ -1,9 +1,19 @@
 #include <iostream>
 #include "Node/NodeHandler.h"
 #include <opencv2/opencv.hpp>
-
+#include "DBoW2.h"
 using namespace cv;
 using namespace std;
+using namespace DBoW2;
+
+const int k = 9;
+const int L = 3;
+const WeightingType weight = TF_IDF;
+const ScoringType scoring = L1_NORM;
+
+
+OrbVocabulary voc(k, L, weight, scoring);
+
 
 void ExtractPoint2D(char* filename, vector<Point2f> &extracted_point2d, int &image_width, int &image_height, float &arg_min_point_x, float& arg_min_point_y)
 {
@@ -59,6 +69,7 @@ int main(int argc, char** argv)
 {
   char filename[] = "/media/jeon/T7/Kitti dataset/data_odometry_poses/dataset/poses/00.txt";
   vector<Point2f> point2d;
+  cout << "Vocabulary information: " << endl<< voc << endl;
   int image_width;
   int image_height;
   float min_point_x;
@@ -75,6 +86,7 @@ int main(int argc, char** argv)
   for(int camera_ind=0; camera_ind<file_names.size(); camera_ind++)
   {
     Mat candidate_image = imread(file_names[camera_ind],IMREAD_GRAYSCALE);//전체 파일들을 불러옵니다.
+    imshow("camera image",candidate_image);
     clock_t start = clock();
     bool b_IsGoodKeyFrame = nodehandler.ValidateAndAddFrame(candidate_image);//적절한 키프레임인지 검사를 합니다.
 
@@ -110,7 +122,7 @@ int main(int argc, char** argv)
       circle(map_image,Point(10+(point2d[neighbor_keyframe].x-min_point_x)*3,10+((point2d[neighbor_keyframe].y-min_point_y))*30),10,Scalar(255,0,0),-1,8,0);
     }
     imshow("map image",map_image);
-    waitKey(1);
+    waitKey(0);
     // while( waitKey(-1) !='n')
     // {
     //   continue;

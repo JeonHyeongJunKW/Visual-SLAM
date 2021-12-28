@@ -55,23 +55,23 @@ bool NodeHandler::ValidateAndAddFrame(Mat arg_candidateImage)
 
   //step 2 : 가지고 있는 키포인트의 개수를 구합니다. 
   
-  KeyFrame* kfp_NewKeyFrame = new KeyFrame(this->int_CurrentFrameIdx-1, this->_mat_InstrisicParam);//해당 키프레임 포인터 가져오고
+  KeyFrame* kfp_TempFrame = new KeyFrame(this->int_CurrentFrameIdx-1, this->_mat_InstrisicParam);//해당 키프레임 포인터 가져오고
   //키프레임 노드 생성및 정보를 등록합니다. 
 
   Mat des;
   vector<KeyPoint> kp_vector;
-  int kp_size = this->_Get_NumberOfOrbFeature(arg_candidateImage,des,kp_vector);
+  int kp_size = this->_Get_NumberOfOrbFeature(arg_candidateImage,des,kp_vector);//현재 프레임에 대한 feature들을 얻어온다.
   //부모키프레임을 등록합니다.
   if(!this->_pt_KeyFrames.empty())//부모키프레임이 존재할 수 있다면(이미 하나정도 저장되어있다면)
   {
-    kfp_NewKeyFrame->Set_FatherKeyFrame(*(_pt_KeyFrames.end()-1));
-    (*(_pt_KeyFrames.end()-1))->Set_ChildKeyFrame(kfp_NewKeyFrame);
+    kfp_TempFrame->Set_FatherKeyFrame(*(_pt_KeyFrames.end()-1));
+    (*(_pt_KeyFrames.end()-1))->Set_ChildKeyFrame(kfp_TempFrame);
   }
   int int_DescriptorSize = 32;
-  kfp_NewKeyFrame->Set_Descriptor(des);//디스크립터 등록합니다.
-  kfp_NewKeyFrame->Set_KeyPoint(kp_vector);//키포인터 등록합니다. 
+  kfp_TempFrame->Set_Descriptor(des);//디스크립터 등록합니다.
+  kfp_TempFrame->Set_KeyPoint(kp_vector);//키포인터 등록합니다. 
 
-  Change_Window(kfp_NewKeyFrame);//로컬윈도우를 바꾸면서 매칭을 다시만듭니다. 
+  Change_Window(kfp_TempFrame);//로컬윈도우를 바꾸면서 매칭을 다시만듭니다. 
 
   this->int_LastKeyFrameIdx = this->int_CurrentFrameIdx-1;
   return true;
@@ -92,10 +92,13 @@ bool NodeHandler::Change_Window(KeyFrame* arg_NewKeyFrame)
   vector<KeyFrame*> tempFrame;//확인용 프레임입니다.
   vector<Match_Set*> tempMatch;//확인용 매칭입니다. 
   int die_size = 0;
-  // cout<<"----------------------------"<<endl;
+  cout<<"----------------------------"<<endl;
   if(int_Current_LocalSize ==0)
   {
-    _pt_LocalWindowKeyFrames.push_back(arg_NewKeyFrame);
+    this->_pt_LocalWindowKeyFrames.push_back(arg_NewKeyFrame);//로컬 키프레임에 등록 
+    this->_pt_KeyFrames.push_back(arg_NewKeyFrame);//전역 키프레임에 등록
+    cout<<"초기 프레임을 삽입합니다."<<endl;
+    //처음에는 맵포인트가 없기때문에 등록하지 않습니다. 
     return true;
   }
   else
@@ -107,35 +110,52 @@ bool NodeHandler::Change_Window(KeyFrame* arg_NewKeyFrame)
     {//키프레임을 비교합니다. 
       vector< vector<DMatch>> matches;//매치를 저장할 변수입니다.
       //1:1 매칭을 통해서 비교합니다.
-      this->_match_OrbMatchHandle->knnMatch(arg_NewKeyFrame->Get_Descriptor(),this->_pt_LocalWindowKeyFrames[int_keyIdx]->Get_Descriptor(),matches,2);//쿼리 디스크립터를 찾습니다. 
-      vector<DMatch> good_matches;
-      const float ratio_thresh = 0.65f;
-      for (size_t i = 0; i < matches.size(); i++)
-      {
+      if(int_Current_LocalSize ==1)//아직 하나밖에 없는경우
+      {//기존의 것과 knn으로 비교합니다.
+        this->_match_OrbMatchHandle->knnMatch(arg_NewKeyFrame->Get_Descriptor(),this->_pt_LocalWindowKeyFrames[int_keyIdx]->Get_Descriptor(),matches,2);//쿼리 디스크립터를 찾습니다. 
+        vector<DMatch> good_matches;
+        const float ratio_thresh = 0.65f;
+        //일단 둘사이의 연관점을 기반으로 맵포인트를 만들어서 odometry를사용해야합니다. 
+        for (size_t i = 0; i < matches.size(); i++)
+        {
           if (matches[i][0].distance < ratio_thresh * matches[i][1].distance)
           {
-              good_matches.push_back(matches[i][0]);
-              //바로 로컬 상관관계를 등록합니다. 
-              tempMatch.push_back(new Match_Set(arg_NewKeyFrame,
-                                              _pt_LocalWindowKeyFrames[int_keyIdx],
-                                              &(arg_NewKeyFrame->Get_keyPoint()[i]),
-                                              &(_pt_LocalWindowKeyFrames[int_keyIdx]->Get_keyPoint()[matches[i][0].trainIdx])));
+            good_matches.push_back(matches[i][0]);
+            //바로 로컬 상관관계를 등록합
+            tempMatch.push_back(new Match_Set(arg_NewKeyFrame,
+                                            _pt_LocalWindowKeyFrames[int_keyIdx],
+                                            &(arg_NewKeyFrame->Get_keyPoint()[i]),
+                                            &(_pt_LocalWindowKeyFrames[int_keyIdx]->Get_keyPoint()[matches[i][0].trainIdx])));
+            
           }
-      }
-      if(good_matches.size()>0)
-      {
-        if(good_matches.size()>max_match)
-        {
-          max_match = good_matches.size();
-          max_match_idx = int_keyIdx;
         }
-        //F_1에 추가해버립니다. 
-        tempFrame.push_back(_pt_LocalWindowKeyFrames[int_keyIdx]);
-        // cout<<_pt_LocalWindowKeyFrames[int_keyIdx]->Get_KeyIndex()<<"번째 포인터 : "<<good_matches.size()<<endl;
-      }
-      else
-      {
-        die_size++; //버려진 키프레임의 수
+        if(good_matches.size()>0)
+        {
+          cout <<"처음 키프레임과 나중 키프레임이 연결이 되었습니다."<<endl;
+          if(good_matches.size()>50)
+          {
+            if(good_matches.size()>270)
+            {
+              cout <<"reference랑 너무 많이 연결이 되었습니다. "<<endl;
+            }
+            else
+            {
+              cout <<"reference랑 연결이 되었습니다. "<<endl;
+              max_match = good_matches.size();
+              max_match_idx = int_keyIdx;
+            }
+            
+          }
+        }
+        else
+        {
+          cout <<"처음 키프레임과 나중키프레임이 연결이 안되었습니다."<<endl;
+        }
+
+      }//하나만 추가되는 경우 
+      else//일반적인 케이스
+      {//이전의 맵포인트로 얻은거를 기반으로해서 얻습니다.
+
       }
     }
     //매칭되는게 없으면 다시 로컬라이제이션 해줍니다. 
@@ -145,33 +165,39 @@ bool NodeHandler::Change_Window(KeyFrame* arg_NewKeyFrame)
     }
     else//있다면 그중에서 가장 큰걸 Reference Frame으로 잡고 개수 비교를 해서 추가할지 말지를 정합니다. 
     {
+      
       KeyFrame* kfp_ReferenceFrame = _pt_LocalWindowKeyFrames[max_match_idx];
-      if (max_match >= (int)(arg_NewKeyFrame->Get_keyPoint().size()*0.9))//10프로 이상의 점들이 처음보는 점들이어야함.
-      { 
-        cout<<"static type"<<endl;
-        return false;
-      }
-      else
-      {
-        //임시 프레임과 매칭을 갱신합니다.
-        tempFrame.push_back(arg_NewKeyFrame);
-        
-        this->_pt_LocalWindowKeyFrames.clear();
-        this->_pt_LocalWindowKeyFrames = tempFrame;
-        this->_local_MatchSet.clear();
-        this->_local_MatchSet = tempMatch;
+      cout<<"reference frame("<<max_match_idx<<")을 정했고 Visual Odometry를 구합니다."<<endl;
+      cout<<"매칭의 개수 : "<<tempMatch.size()<<endl;
+      exit(0);
+      //임시 프레임과 매칭을 갱신합니다.
+      // tempFrame.push_back(arg_NewKeyFrame);
+      
+      /*
+      1. homography나 Essential matrix를 써서 두 이미지간에 r,t,n값을 알아낸다. 
+      2. 이를 기반으로하여 odometry의 초기값을 알아낸다. (맵포인트들은 나중에 삼각법으로 3차원상의 점으로 만들어서 구한다(local mapping에서 처리되는부분), 
+          위치부터 트랙킹부터 한다. )
+      3. 나중에 얻은 맵포인트들을 기반으로하여 현재 프레임에대한 평가를 내리고, 50개의 맵포인트가 트랙킹되는지 구한다.
+      4. 또한 래펀런스와 유사한지도 확인한다. 이를 기반으로 추정한다. 
+      */
 
-        this->_pt_KeyFrames.push_back(arg_NewKeyFrame);//전역 키프레임에 등록
-        
+
+
+      this->_pt_LocalWindowKeyFrames.clear();
+      this->_pt_LocalWindowKeyFrames = tempFrame;
+      this->_local_MatchSet.clear();
+      this->_local_MatchSet = tempMatch;
+
+      this->_pt_KeyFrames.push_back(arg_NewKeyFrame);//전역 키프레임에 등록
+      
+      // cout<<"K1 : "<<this->_pt_LocalWindowKeyFrames.size()<< "max match : "<< max_match<<endl;
+      if(max_match<5)
+      {
         // cout<<"K1 : "<<this->_pt_LocalWindowKeyFrames.size()<< "max match : "<< max_match<<endl;
-        if(max_match<5)
-        {
-          // cout<<"K1 : "<<this->_pt_LocalWindowKeyFrames.size()<< "max match : "<< max_match<<endl;
-          cout<<"small MapPoint : "<<max_match<<endl;
-        }
-        // cout<<"버려진 키프레임의 수"<<die_size<<endl;
-        return true;
+        cout<<"small MapPoint : "<<max_match<<endl;
       }
+      // cout<<"버려진 키프레임의 수"<<die_size<<endl;
+      return true;
     }
   }
 }

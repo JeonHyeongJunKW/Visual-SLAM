@@ -20,7 +20,7 @@ void ExtractPoint2D(char* filename, vector<Point2f> &extracted_point2d, int &ima
   extracted_point2d.clear();//기존에 들어있는 점을 지웁니다.
   ifstream poseFile;
   poseFile.open(filename);
-  cout<<filename<<endl;
+  // cout<<filename<<endl;
   if(poseFile.is_open())
   {
     while(!poseFile.eof())
@@ -58,7 +58,7 @@ void ExtractPoint2D(char* filename, vector<Point2f> &extracted_point2d, int &ima
         min_point_y = point->y;
       }
   }
-  cout <<" minimum x : "<<min_point_x <<", minimum y : "<<min_point_y<<", maximum x : "<<max_point_x <<", maximum y : "<<max_point_y<<endl;
+  // cout <<" minimum x : "<<min_point_x <<", minimum y : "<<min_point_y<<", maximum x : "<<max_point_x <<", maximum y : "<<max_point_y<<endl;
   image_width = (int)((max_point_x- min_point_x)*3+20);//좌우로 10칸씩 추가하였다. 
   image_height = (int)(max_point_y - min_point_y)*30+20;//좌우로 10칸씩 추가하였다. 행은 10배로 늘렸다.
   arg_min_point_x = min_point_x;
@@ -74,10 +74,10 @@ int main(int argc, char** argv)
   int image_height;
   float min_point_x;
   float min_point_y;
-  ExtractPoint2D(filename,point2d, image_width, image_height, min_point_x,min_point_y);//file 정보 및 이미지의 높이를 가져온다.
+  ExtractPoint2D(filename, point2d, image_width, image_height, min_point_x,min_point_y);//file 정보 및 이미지의 높이를 가져온다.
   vector<cv::String> file_names;
   glob("/media/jeon/T7/Kitti dataset/data_odometry_gray/dataset/sequences/00/image_0/*.png", file_names, false);
-  NodeHandler nodehandler(7,30);
+  NodeHandler nodehandler(2,30);//2프레임 단위로 받는다. 
   nodehandler.Set_InstricParam(718.856,718.856,0.00,607.1928,185.2157);
 
   Mat map_image;
@@ -122,7 +122,7 @@ int main(int argc, char** argv)
       circle(map_image,Point(10+(point2d[neighbor_keyframe].x-min_point_x)*3,10+((point2d[neighbor_keyframe].y-min_point_y))*30),10,Scalar(255,0,0),-1,8,0);
     }
     imshow("map image",map_image);
-    waitKey(0);
+    waitKey(1);
     // while( waitKey(-1) !='n')
     // {
     //   continue;

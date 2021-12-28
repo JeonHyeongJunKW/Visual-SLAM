@@ -68,6 +68,7 @@ class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다.
     bool Change_Window(KeyFrame* arg_NewKeyFrame);
 
     bool ValidateAndAddFrame(Mat arg_candidateImage);
+    bool MakeMapPoint(KeyFrame* kfp_beforeFrame, KeyFrame* kfp_afterFrame);
 
     vector<KeyFrame*> Get_LocalKeyFrame(void);
 

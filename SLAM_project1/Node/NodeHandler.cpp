@@ -237,7 +237,7 @@ bool NodeHandler::ValidateHomography(vector<Point2f> &arg_kp1, vector<Point2f> &
   vector<Mat> Normals_decomp;
   int solutions = decomposeHomographyMat(H,InstrincParam,Rs_decomp,Ts_decomp,Normals_decomp);
   cout<<solutions<<endl;
-  for (int i = 0; i < 1; i++)
+  for (int i = 0; i < solutions; i++)
   {
     Mat rvec_decomp;
     cout << "Solution " << i << ":" << endl;
@@ -250,15 +250,11 @@ bool NodeHandler::ValidateHomography(vector<Point2f> &arg_kp1, vector<Point2f> &
     Ts_decomp[i].copyTo(projectMatrix(Rect(3,0,1,3)));
     Mat InitProjectMatrix = Mat::eye(3,4,CV_64FC1);
     cout << "projection Matrix from homography decomposition: " <<endl<<  projectMatrix<<endl;
-    Mat mat_pt1(arg_kp1);
-    Mat mat_pt2(arg_kp2);
-
     Mat dist_coef(1,4,CV_32FC1);//null이나 0값으로 초기화하였다. 
-    // Mat mat_Undistorted_pt1;
-    // Mat mat_Undistorted_pt2;
     vector<Point2f> Undistorted_pt1;
     Custom_undisortionPoints(arg_kp1,InstrincParam,Undistorted_pt1);//mm단위로 바꿔줍니다.
-
+    vector<Point2f> Undistorted_pt2;
+    Custom_undisortionPoints(arg_kp2,InstrincParam,Undistorted_pt2);//mm단위로 바꿔줍니다.
     // triangulatePoints(InitProjectMatrix,projectMatrix,mat_Undistorted_pt1,mat_Undistorted_pt2,outputMatrix);
     // cout<<"triangulation 후의 결과점 "<<endl;
     // cout<<outputMatrix.t()(Rect(0,0,4,3))<<endl;
@@ -272,7 +268,6 @@ bool NodeHandler::ValidateHomography(vector<Point2f> &arg_kp1, vector<Point2f> &
     // {//기존프레임에 대해서 앞으로 이동했을거기 때문에 
     //   cout<<Ts_decomp[i].at<double>(2,0)<<endl;
     // }
-    
   }
   exit(0);
 }

@@ -71,5 +71,5 @@ class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다.
     bool MakeMapPoint(KeyFrame* kfp_beforeFrame, KeyFrame* kfp_afterFrame);
 
     vector<KeyFrame*> Get_LocalKeyFrame(void);
-
+    bool ValidateHomography(vector<Point2f> &arg_kp1, vector<Point2f> &arg_kp2, Mat InstrincParam,Mat& R, Mat& t, float score);
 };

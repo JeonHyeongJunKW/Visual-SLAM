@@ -15,9 +15,13 @@ CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o: /usr/local/in
 CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o: /usr/local/include/DBoW2/TemplatedDatabase.h
 CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o: /usr/local/include/DBoW2/TemplatedVocabulary.h
 
+CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.o: ../Node/CameraTool.cpp
+CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.o: ../Node/CameraTool.h
+
 CMakeFiles/KeyFrameViewer.dir/Node/KeyFrame.cpp.o: ../Node/KeyFrame.cpp
 CMakeFiles/KeyFrameViewer.dir/Node/KeyFrame.cpp.o: ../Node/KeyFrame.h
 
+CMakeFiles/KeyFrameViewer.dir/Node/NodeHandler.cpp.o: ../Node/CameraTool.h
 CMakeFiles/KeyFrameViewer.dir/Node/NodeHandler.cpp.o: ../Node/KeyFrame.h
 CMakeFiles/KeyFrameViewer.dir/Node/NodeHandler.cpp.o: ../Node/NodeHandler.cpp
 CMakeFiles/KeyFrameViewer.dir/Node/NodeHandler.cpp.o: ../Node/NodeHandler.h

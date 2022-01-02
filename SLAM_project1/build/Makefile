@@ -150,6 +150,33 @@ KeyFrameMakeAndRelocalization.cpp.s:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.s
 .PHONY : KeyFrameMakeAndRelocalization.cpp.s
 
+Node/CameraTool.o: Node/CameraTool.cpp.o
+
+.PHONY : Node/CameraTool.o
+
+# target to build an object file
+Node/CameraTool.cpp.o:
+	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.o
+.PHONY : Node/CameraTool.cpp.o
+
+Node/CameraTool.i: Node/CameraTool.cpp.i
+
+.PHONY : Node/CameraTool.i
+
+# target to preprocess a source file
+Node/CameraTool.cpp.i:
+	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.i
+.PHONY : Node/CameraTool.cpp.i
+
+Node/CameraTool.s: Node/CameraTool.cpp.s
+
+.PHONY : Node/CameraTool.s
+
+# target to generate assembly for a file
+Node/CameraTool.cpp.s:
+	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.s
+.PHONY : Node/CameraTool.cpp.s
+
 Node/KeyFrame.o: Node/KeyFrame.cpp.o
 
 .PHONY : Node/KeyFrame.o
@@ -216,6 +243,9 @@ help:
 	@echo "... KeyFrameMakeAndRelocalization.o"
 	@echo "... KeyFrameMakeAndRelocalization.i"
 	@echo "... KeyFrameMakeAndRelocalization.s"
+	@echo "... Node/CameraTool.o"
+	@echo "... Node/CameraTool.i"
+	@echo "... Node/CameraTool.s"
 	@echo "... Node/KeyFrame.o"
 	@echo "... Node/KeyFrame.i"
 	@echo "... Node/KeyFrame.s"

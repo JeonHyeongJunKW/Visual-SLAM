@@ -7,28 +7,6 @@
 using namespace std;
 using namespace cv;
 
-string type2str(int type) {
-  string r;
-
-  uchar depth = type & CV_MAT_DEPTH_MASK;
-  uchar chans = 1 + (type >> CV_CN_SHIFT);
-
-  switch ( depth ) {
-    case CV_8U:  r = "8U"; break;
-    case CV_8S:  r = "8S"; break;
-    case CV_16U: r = "16U"; break;
-    case CV_16S: r = "16S"; break;
-    case CV_32S: r = "32S"; break;
-    case CV_32F: r = "32F"; break;
-    case CV_64F: r = "64F"; break;
-    default:     r = "User"; break;
-  }
-
-  r += "C";
-  r += (chans+'0');
-
-  return r;
-}
 NodeHandler::NodeHandler()
 {
 
@@ -231,31 +209,88 @@ vector<KeyFrame*> NodeHandler::Get_LocalKeyFrame(void)
 bool NodeHandler::ValidateHomography(vector<Point2f> &arg_kp1, vector<Point2f> &arg_kp2, Mat InstrincParam, Mat& R, Mat& t, float score)
 {
   Mat H = findHomography(arg_kp1, arg_kp2, RANSAC);
-  cout<<H<<endl;
   vector<Mat> Rs_decomp;
   vector<Mat> Ts_decomp;
   vector<Mat> Normals_decomp;
+  Mat InstrincParam_64FC1;
+  InstrincParam.convertTo(InstrincParam_64FC1,CV_64FC1);
   int solutions = decomposeHomographyMat(H,InstrincParam,Rs_decomp,Ts_decomp,Normals_decomp);
-  cout<<solutions<<endl;
-  for (int i = 0; i < solutions; i++)
+  
+  for (int i = 0; i < 4; i++)
   {
-    Mat rvec_decomp;
     cout << "Solution " << i << ":" << endl;
-    
-    Rodrigues(Rs_decomp[i], rvec_decomp);
-    // cout << "rvec from homography decomposition: " <<endl<< Rs_decomp[i] << endl;
-    // cout << "tvec from homography decomposition: " <<endl<<  Ts_decomp[i]<<endl;
     Mat projectMatrix = Mat(3,4,CV_64FC1);
     Rs_decomp[i].copyTo(projectMatrix(Rect(0,0,3,3)));
     Ts_decomp[i].copyTo(projectMatrix(Rect(3,0,1,3)));
     Mat InitProjectMatrix = Mat::eye(3,4,CV_64FC1);
-    cout << "projection Matrix from homography decomposition: " <<endl<<  projectMatrix<<endl;
-    Mat dist_coef(1,4,CV_32FC1);//null이나 0값으로 초기화하였다. 
+    // cout << "projection Matrix from homography decomposition: " <<endl<<  projectMatrix<<endl;
+    Mat dist_coef(1,4,CV_64FC1);//null이나 0값으로 초기화하였다. 
     vector<Point2f> Undistorted_pt1;
     Custom_undisortionPoints(arg_kp1,InstrincParam,Undistorted_pt1);//mm단위로 바꿔줍니다.
     vector<Point2f> Undistorted_pt2;
     Custom_undisortionPoints(arg_kp2,InstrincParam,Undistorted_pt2);//mm단위로 바꿔줍니다.
-    // triangulatePoints(InitProjectMatrix,projectMatrix,mat_Undistorted_pt1,mat_Undistorted_pt2,outputMatrix);
+    vector<Point3f> Output_pt;
+    Mat outputMatrix;
+    triangulatePoints(InitProjectMatrix,projectMatrix,Undistorted_pt1,Undistorted_pt2,outputMatrix);
+
+    vector<Point3d> points;
+
+    for(int point_ind=0; point_ind<outputMatrix.cols; point_ind++)
+    {
+      Mat x = outputMatrix.col(point_ind);
+      x /= x.at<float>(3,0);
+      Point3d p (
+            x.at<float>(0,0), 
+            x.at<float>(1,0), 
+            x.at<float>(2,0) 
+        );
+      points.push_back( p );
+    }
+    int good_match =0;
+    int not_good_match =0;
+    for(int point_ind=0; point_ind<points.size(); point_ind++)
+    {
+      Point3d point3d1 = points[point_ind];//3차원점입니다.
+      Mat estimated_point2 = Rs_decomp[i].inv()*(Mat(point3d1)-Ts_decomp[i]);//2번째 이미지의 좌표계로 바꾼 3차원점입니다.
+      Point3d point3d2 (
+            estimated_point2.at<double>(0,0), 
+            estimated_point2.at<double>(1,0), 
+            estimated_point2.at<double>(2,0) 
+        );
+      // cout<< estimated_point2<<endl;
+      if(point3d2.z<0)//1. 3차원으로 z값이 0보다 작으면 잘못된 매칭입니다.
+      {
+        not_good_match++;
+      }
+      point3d1 /= point3d1.z; //정규화를 합니다.
+      point3d2 /= point3d2.z; //정규화를 합니다. 
+      // cout<<type2str(InstrincParam_64FC1.type())<<endl;
+      Mat projected_pixel_point1 = InstrincParam_64FC1*Mat(point3d1);//카메라 파라미터를 곱해서 원래 픽셀좌표로 바꿉니다. 
+      Mat projected_pixel_point2 = InstrincParam_64FC1*Mat(point3d2);//카메라 파라미터를 곱해서 원래 픽셀좌표로 바꿉니다. 
+      // cout<<"--------------"<<endl;
+      // cout<<"실제 1 : "<<arg_kp1[point_ind]<<endl;
+      // cout<<"투영 1 : "<<projected_pixel_point1.t()<<endl;
+      // cout<<"실제 2 : "<<arg_kp2[point_ind]<<endl;
+      // cout<<"투영 2 : "<<projected_pixel_point2.t()<<endl;
+      double image1_error = (arg_kp1[point_ind].x-projected_pixel_point1.at<double>(0,0))*
+                                          (arg_kp1[point_ind].x-projected_pixel_point1.at<double>(0,0))
+                          + (arg_kp1[point_ind].y-projected_pixel_point1.at<double>(1,0))*
+                                          (arg_kp1[point_ind].y-projected_pixel_point1.at<double>(1,0));
+      double image2_error = (arg_kp2[point_ind].x-projected_pixel_point2.at<double>(0,0))*
+                                          (arg_kp2[point_ind].x-projected_pixel_point2.at<double>(0,0))
+                          + (arg_kp2[point_ind].y-projected_pixel_point2.at<double>(1,0))*
+                                          (arg_kp2[point_ind].y-projected_pixel_point2.at<double>(1,0));
+
+      // cout<<"----------------------------"<<endl;
+      // cout<< image1_error<<endl;
+      // cout<< image2_error<<endl;
+      if(image1_error<8 && image2_error<8)
+      {
+        cout<<"??"<<endl;
+      }
+    }
+    cout<<"좋은 매치 갯수 : "<<good_match<<endl;
+    cout<<"이상한 매치 수 : "<<not_good_match<<endl;
     // cout<<"triangulation 후의 결과점 "<<endl;
     // cout<<outputMatrix.t()(Rect(0,0,4,3))<<endl;
 

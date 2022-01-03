@@ -85,6 +85,7 @@ int main(int argc, char** argv)
   vector<int> key_index;
   for(int camera_ind=0; camera_ind<file_names.size(); camera_ind++)
   {
+    // camera_ind=0;
     Mat candidate_image = imread(file_names[camera_ind],IMREAD_GRAYSCALE);//전체 파일들을 불러옵니다.
     imshow("camera image",candidate_image);
     clock_t start = clock();

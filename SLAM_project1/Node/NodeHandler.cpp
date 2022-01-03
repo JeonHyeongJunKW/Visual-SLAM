@@ -248,6 +248,7 @@ bool NodeHandler::ValidateHomography(vector<Point2f> &arg_kp1, vector<Point2f> &
     }
     int good_match =0;
     int not_good_match =0;
+    int small_error_match =0;
     for(int point_ind=0; point_ind<points.size(); point_ind++)
     {
       Point3d point3d1 = points[point_ind];//3차원점입니다.
@@ -284,12 +285,12 @@ bool NodeHandler::ValidateHomography(vector<Point2f> &arg_kp1, vector<Point2f> &
       // cout<<"----------------------------"<<endl;
       // cout<< image1_error<<endl;
       // cout<< image2_error<<endl;
-      if(image1_error<8 && image2_error<8)
+      if(image1_error<70 && image2_error<70)
       {
-        cout<<"??"<<endl;
+        small_error_match++;
       }
     }
-    cout<<"좋은 매치 갯수 : "<<good_match<<endl;
+    cout<<"좋은 매치 갯수 : "<<small_error_match<<endl;
     cout<<"이상한 매치 수 : "<<not_good_match<<endl;
     // cout<<"triangulation 후의 결과점 "<<endl;
     // cout<<outputMatrix.t()(Rect(0,0,4,3))<<endl;

@@ -3,10 +3,11 @@
 #include <opencv2/opencv.hpp>
 #include <math.h>
 #include "CameraTool.h"
+#include <thread>
 
 using namespace std;
 using namespace cv;
-
+void CheckRT(int solution_idx,vector<Point2f> current_p2f, vector<Point2f> past_p2f,Mat IntrinsicParam,Mat R, Mat t, int *good_point);
 NodeHandler::NodeHandler()
 {
 
@@ -97,7 +98,7 @@ bool NodeHandler::Change_Window(KeyFrame* arg_NewKeyFrame)
         //일단 둘사이의 연관점을 기반으로 맵포인트를 만들어서 odometry를사용해야합니다. 
         for (size_t i = 0; i < matches.size(); i++)
         {
-          if (matches[i][0].distance < ratio_thresh * matches[i][1].distance)
+          if (matches[i][0].distance < ratio_thresh * matches[i][1].distance)//query -> first
           {
             good_matches.push_back(matches[i][0]);
             //바로 로컬 상관관계를 등록합
@@ -159,22 +160,20 @@ bool NodeHandler::Change_Window(KeyFrame* arg_NewKeyFrame)
       4. 또한 래펀런스와 유사한지도 확인한다. 이를 기반으로 추정한다. 
       */
       //Homography를 구합니다.
-      vector<Point2f> first_point;
-      vector<Point2f> second_point;
+      vector<Point2f> current_point;
+      vector<Point2f> last_point;
 
       for( size_t i = 0; i < good_matches.size(); i++ )
       {
           //-- Get the keypoints from the good matches
-          // first_point.push_back( kfp_ReferenceFrame->Get_keyPoint()[ good_matches[i].queryIdx ].pt );
-          // second_point.push_back( arg_NewKeyFrame->Get_keyPoint()[ good_matches[i].trainIdx ].pt );
           Match_Set* homo_set = tempMatch[i];
-          first_point.push_back(homo_set->kp_first->pt);
-          second_point.push_back(homo_set->kp_second->pt);
+          current_point.push_back(homo_set->kp_first->pt);//현재프레임
+          last_point.push_back(homo_set->kp_second->pt);//나중프레임
       }
       Mat Homography_R;
       Mat Homography_T;
       float Homography_score;
-      ValidateHomography(first_point,second_point,kfp_ReferenceFrame->Get_IntrinsicParam(),Homography_R,Homography_T,Homography_score);
+      ValidateHomography(current_point,last_point,kfp_ReferenceFrame->Get_IntrinsicParam(),Homography_R,Homography_T,Homography_score);
 
       this->_pt_LocalWindowKeyFrames.clear();
       this->_pt_LocalWindowKeyFrames = tempFrame;
@@ -208,102 +207,118 @@ vector<KeyFrame*> NodeHandler::Get_LocalKeyFrame(void)
 
 bool NodeHandler::ValidateHomography(vector<Point2f> &arg_kp1, vector<Point2f> &arg_kp2, Mat InstrincParam, Mat& R, Mat& t, float score)
 {
-  Mat H = findHomography(arg_kp1, arg_kp2, RANSAC);
+  Mat H = findHomography(arg_kp2, arg_kp1, RANSAC);
   vector<Mat> Rs_decomp;
   vector<Mat> Ts_decomp;
   vector<Mat> Normals_decomp;
   Mat InstrincParam_64FC1;
   InstrincParam.convertTo(InstrincParam_64FC1,CV_64FC1);
-  int solutions = decomposeHomographyMat(H,InstrincParam,Rs_decomp,Ts_decomp,Normals_decomp);
-  
-  for (int i = 0; i < 4; i++)
+  int solutions = decomposeHomographyMat(H,InstrincParam,Rs_decomp,Ts_decomp,Normals_decomp);//반환해주는 변환은 계사이의 변환이기 때문에 기존의 R,t의 변환이다. 
+  //funamental matrix를 구합니다. 
+
+  //https://ros-developer.com/2019/01/01/computing-essential-and-fundamental-matrix-using-opencv-8-points-algorithm-with-c/
+  Mat opencv_essential_mat;
+  opencv_essential_mat=findEssentialMat(arg_kp2,arg_kp1,InstrincParam);
+  Mat outputR;
+  Mat outputT;
+  Mat Mask;
+  recoverPose(opencv_essential_mat,arg_kp2,arg_kp1,InstrincParam,outputR,outputT,Mask);
+  Rs_decomp.push_back(outputR);
+  Ts_decomp.push_back(outputT);
+  int good_points[5] ={0,0,0,0,0};
+  thread threads[5];
+
+  for (int i = 0; i < 5; i++)//쓰레드 5개를 돌려서, 각각의 R,t의 가치정보를 얻습니다. 
   {
-    cout << "Solution " << i << ":" << endl;
-    Mat projectMatrix = Mat(3,4,CV_64FC1);
-    Rs_decomp[i].copyTo(projectMatrix(Rect(0,0,3,3)));
-    Ts_decomp[i].copyTo(projectMatrix(Rect(3,0,1,3)));
-    Mat InitProjectMatrix = Mat::eye(3,4,CV_64FC1);
-    // cout << "projection Matrix from homography decomposition: " <<endl<<  projectMatrix<<endl;
-    Mat dist_coef(1,4,CV_64FC1);//null이나 0값으로 초기화하였다. 
-    vector<Point2f> Undistorted_pt1;
-    Custom_undisortionPoints(arg_kp1,InstrincParam,Undistorted_pt1);//mm단위로 바꿔줍니다.
-    vector<Point2f> Undistorted_pt2;
-    Custom_undisortionPoints(arg_kp2,InstrincParam,Undistorted_pt2);//mm단위로 바꿔줍니다.
-    vector<Point3f> Output_pt;
-    Mat outputMatrix;
-    triangulatePoints(InitProjectMatrix,projectMatrix,Undistorted_pt1,Undistorted_pt2,outputMatrix);
-
-    vector<Point3d> points;
-
-    for(int point_ind=0; point_ind<outputMatrix.cols; point_ind++)
-    {
-      Mat x = outputMatrix.col(point_ind);
-      x /= x.at<float>(3,0);
-      Point3d p (
-            x.at<float>(0,0), 
-            x.at<float>(1,0), 
-            x.at<float>(2,0) 
-        );
-      points.push_back( p );
-    }
-    int good_match =0;
-    int not_good_match =0;
-    int small_error_match =0;
-    for(int point_ind=0; point_ind<points.size(); point_ind++)
-    {
-      Point3d point3d1 = points[point_ind];//3차원점입니다.
-      Mat estimated_point2 = Rs_decomp[i].inv()*(Mat(point3d1)-Ts_decomp[i]);//2번째 이미지의 좌표계로 바꾼 3차원점입니다.
-      Point3d point3d2 (
-            estimated_point2.at<double>(0,0), 
-            estimated_point2.at<double>(1,0), 
-            estimated_point2.at<double>(2,0) 
-        );
-      // cout<< estimated_point2<<endl;
-      if(point3d2.z<0)//1. 3차원으로 z값이 0보다 작으면 잘못된 매칭입니다.
-      {
-        not_good_match++;
-      }
-      point3d1 /= point3d1.z; //정규화를 합니다.
-      point3d2 /= point3d2.z; //정규화를 합니다. 
-      // cout<<type2str(InstrincParam_64FC1.type())<<endl;
-      Mat projected_pixel_point1 = InstrincParam_64FC1*Mat(point3d1);//카메라 파라미터를 곱해서 원래 픽셀좌표로 바꿉니다. 
-      Mat projected_pixel_point2 = InstrincParam_64FC1*Mat(point3d2);//카메라 파라미터를 곱해서 원래 픽셀좌표로 바꿉니다. 
-      // cout<<"--------------"<<endl;
-      // cout<<"실제 1 : "<<arg_kp1[point_ind]<<endl;
-      // cout<<"투영 1 : "<<projected_pixel_point1.t()<<endl;
-      // cout<<"실제 2 : "<<arg_kp2[point_ind]<<endl;
-      // cout<<"투영 2 : "<<projected_pixel_point2.t()<<endl;
-      double image1_error = (arg_kp1[point_ind].x-projected_pixel_point1.at<double>(0,0))*
-                                          (arg_kp1[point_ind].x-projected_pixel_point1.at<double>(0,0))
-                          + (arg_kp1[point_ind].y-projected_pixel_point1.at<double>(1,0))*
-                                          (arg_kp1[point_ind].y-projected_pixel_point1.at<double>(1,0));
-      double image2_error = (arg_kp2[point_ind].x-projected_pixel_point2.at<double>(0,0))*
-                                          (arg_kp2[point_ind].x-projected_pixel_point2.at<double>(0,0))
-                          + (arg_kp2[point_ind].y-projected_pixel_point2.at<double>(1,0))*
-                                          (arg_kp2[point_ind].y-projected_pixel_point2.at<double>(1,0));
-
-      // cout<<"----------------------------"<<endl;
-      // cout<< image1_error<<endl;
-      // cout<< image2_error<<endl;
-      if(image1_error<70 && image2_error<70)
-      {
-        small_error_match++;
-      }
-    }
-    cout<<"좋은 매치 갯수 : "<<small_error_match<<endl;
-    cout<<"이상한 매치 수 : "<<not_good_match<<endl;
-    // cout<<"triangulation 후의 결과점 "<<endl;
-    // cout<<outputMatrix.t()(Rect(0,0,4,3))<<endl;
-
-    // cout << "plane normal from homography decomposition: " << Normals_decomp[i].t() << endl;
-    // double rodrigue_angle = (rvec_decomp.at<double>(0,0)*rvec_decomp.at<double>(0,0)+rvec_decomp.at<double>(1,0)*rvec_decomp.at<double>(1,0)+rvec_decomp.at<double>(2,0)*rvec_decomp.at<double>(2,0));
-    // rodrigue_angle = sqrt(rodrigue_angle); 
-    // cout<<"실제 각도(degree) : "<<rodrigue_angle*180./3.141592653589793<<endl;
-    // cout<<"실제 벡터 : "<<(rvec_decomp/rodrigue_angle).t()<<endl;
-    // if(Ts_decomp[i].at<double>(2,0)>=0)
-    // {//기존프레임에 대해서 앞으로 이동했을거기 때문에 
-    //   cout<<Ts_decomp[i].at<double>(2,0)<<endl;
-    // }
+    threads[i] =  thread(CheckRT,i,arg_kp1,arg_kp2,InstrincParam,Rs_decomp[i],Ts_decomp[i], &good_points[i]); 
   }
+  for (int i=0; i<5; i++)
+  {
+    threads[i].join();
+  }
+  cout<<"전부 끝났습니다. "<<endl;
   exit(0);
+}
+
+
+void CheckRT(int solution_idx,vector<Point2f> current_p2f, vector<Point2f> past_p2f,Mat IntrinsicParam,Mat R, Mat t, int *good_point)
+{
+  Mat projectMatrix = Mat(3,4,CV_64FC1);
+  R.copyTo(projectMatrix(Rect(0,0,3,3)));
+  t.copyTo(projectMatrix(Rect(3,0,1,3)));
+  Mat InitProjectMatrix = Mat::eye(3,4,CV_64FC1);
+
+  Mat dist_coef(1,4,CV_64FC1);//null이나 0값으로 초기화하였다.
+  vector<Point2f> Undistorted_current_pt;
+  Custom_undisortionPoints(current_p2f,IntrinsicParam,Undistorted_current_pt);//mm단위로 바꿔줍니다.
+  vector<Point2f> Undistorted_past_pt;
+  Custom_undisortionPoints(past_p2f,IntrinsicParam,Undistorted_past_pt);//mm단위로 바꿔줍니다.
+  Mat InstrincParam_64FC1;
+  IntrinsicParam.convertTo(InstrincParam_64FC1,CV_64FC1);
+  vector<Point3f> Output_pt;
+  Mat outputMatrix;
+  triangulatePoints(InitProjectMatrix,projectMatrix,Undistorted_past_pt,Undistorted_current_pt,outputMatrix);
+
+  vector<Point3d> points;
+
+  for(int point_ind=0; point_ind<outputMatrix.cols; point_ind++)
+  {
+    Mat x = outputMatrix.col(point_ind);
+    x /= x.at<float>(3,0);
+    Point3d p (
+          x.at<float>(0,0), 
+          x.at<float>(1,0), 
+          x.at<float>(2,0) 
+      );
+    points.push_back( p );
+  }
+  int good_match =0;
+  //parallax 변수 : 각 카메라별 좌표 
+  Mat PastPt = Mat::zeros(3,1, CV_64F);
+  Mat CurrentPt = -R.t()*t;//과거 점 기준
+  for(int point_ind=0; point_ind<points.size(); point_ind++)
+  {
+    Point3d point3d1 = points[point_ind];//3차원점입니다. 과거기준 좌표입니다. 
+    Mat point_pose_in_past = Mat(point3d1);
+    Mat estimated_point2 = R*(Mat(point3d1)+t);//현재 기준 좌표입니다.~~~~~~~~~~~~~~~~이부분은 이해가 안됨
+    Mat PastNormal = point_pose_in_past - PastPt;
+    Mat CurrentNormal =point_pose_in_past - estimated_point2;
+    float past_dist = norm(PastNormal);
+    float current_dist = norm(CurrentNormal);
+    float cosParallax = PastNormal.dot(CurrentNormal)/(past_dist*current_dist);
+    if(cosParallax> 0.9999)
+    {
+      continue;
+    }
+    Point3d point3d2 (//현재기준 좌표입니다.
+          estimated_point2.at<double>(0,0), 
+          estimated_point2.at<double>(1,0), 
+          estimated_point2.at<double>(2,0) 
+      );
+    double origin_depth = estimated_point2.at<double>(2,0);
+
+    point3d1 /= point3d1.z; //정규화를 합니다.
+    point3d2 /= point3d2.z; //정규화를 합니다. 
+    Mat projected_pixel_point1 = InstrincParam_64FC1*Mat(point3d1);//카메라 파라미터를 곱해서 원래 과거 픽셀좌표로 바꿉니다. 
+    Mat projected_pixel_point2 = InstrincParam_64FC1*Mat(point3d2);//카메라 파라미터를 곱해서 원래 현재 픽셀좌표로 바꿉니다. 
+
+    double image1_error = (current_p2f[point_ind].x-projected_pixel_point2.at<double>(0,0))*
+                                        (current_p2f[point_ind].x-projected_pixel_point2.at<double>(0,0))
+                        + (current_p2f[point_ind].y-projected_pixel_point2.at<double>(1,0))*
+                                        (current_p2f[point_ind].y-projected_pixel_point2.at<double>(1,0));
+
+    double image2_error = (past_p2f[point_ind].x-projected_pixel_point1.at<double>(0,0))*
+                                        (past_p2f[point_ind].x-projected_pixel_point1.at<double>(0,0))
+                        + (past_p2f[point_ind].y-projected_pixel_point1.at<double>(1,0))*
+                                        (past_p2f[point_ind].y-projected_pixel_point1.at<double>(1,0));
+    if(origin_depth >0)//1. 3차원으로 z값이 0보다 작으면 잘못된 매칭입니다.
+    {
+      if(image1_error<3 && image2_error<3)
+      {
+        good_match ++;
+      }
+    }
+  }
+  *good_point = good_match;
+  cout << "Solution "<<solution_idx<<" answer : " <<*good_point << endl;
 }

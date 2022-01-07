@@ -150,6 +150,33 @@ KeyFrameMakeAndRelocalization.cpp.s:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.s
 .PHONY : KeyFrameMakeAndRelocalization.cpp.s
 
+LocalMapping/LocalMapping.o: LocalMapping/LocalMapping.cpp.o
+
+.PHONY : LocalMapping/LocalMapping.o
+
+# target to build an object file
+LocalMapping/LocalMapping.cpp.o:
+	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.o
+.PHONY : LocalMapping/LocalMapping.cpp.o
+
+LocalMapping/LocalMapping.i: LocalMapping/LocalMapping.cpp.i
+
+.PHONY : LocalMapping/LocalMapping.i
+
+# target to preprocess a source file
+LocalMapping/LocalMapping.cpp.i:
+	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.i
+.PHONY : LocalMapping/LocalMapping.cpp.i
+
+LocalMapping/LocalMapping.s: LocalMapping/LocalMapping.cpp.s
+
+.PHONY : LocalMapping/LocalMapping.s
+
+# target to generate assembly for a file
+LocalMapping/LocalMapping.cpp.s:
+	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.s
+.PHONY : LocalMapping/LocalMapping.cpp.s
+
 Node/CameraTool.o: Node/CameraTool.cpp.o
 
 .PHONY : Node/CameraTool.o
@@ -231,6 +258,33 @@ Node/NodeHandler.cpp.s:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Node/NodeHandler.cpp.s
 .PHONY : Node/NodeHandler.cpp.s
 
+Tracking/Tracking.o: Tracking/Tracking.cpp.o
+
+.PHONY : Tracking/Tracking.o
+
+# target to build an object file
+Tracking/Tracking.cpp.o:
+	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.o
+.PHONY : Tracking/Tracking.cpp.o
+
+Tracking/Tracking.i: Tracking/Tracking.cpp.i
+
+.PHONY : Tracking/Tracking.i
+
+# target to preprocess a source file
+Tracking/Tracking.cpp.i:
+	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.i
+.PHONY : Tracking/Tracking.cpp.i
+
+Tracking/Tracking.s: Tracking/Tracking.cpp.s
+
+.PHONY : Tracking/Tracking.s
+
+# target to generate assembly for a file
+Tracking/Tracking.cpp.s:
+	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.s
+.PHONY : Tracking/Tracking.cpp.s
+
 # Help Target
 help:
 	@echo "The following are some of the valid targets for this Makefile:"
@@ -243,6 +297,9 @@ help:
 	@echo "... KeyFrameMakeAndRelocalization.o"
 	@echo "... KeyFrameMakeAndRelocalization.i"
 	@echo "... KeyFrameMakeAndRelocalization.s"
+	@echo "... LocalMapping/LocalMapping.o"
+	@echo "... LocalMapping/LocalMapping.i"
+	@echo "... LocalMapping/LocalMapping.s"
 	@echo "... Node/CameraTool.o"
 	@echo "... Node/CameraTool.i"
 	@echo "... Node/CameraTool.s"
@@ -252,6 +309,9 @@ help:
 	@echo "... Node/NodeHandler.o"
 	@echo "... Node/NodeHandler.i"
 	@echo "... Node/NodeHandler.s"
+	@echo "... Tracking/Tracking.o"
+	@echo "... Tracking/Tracking.i"
+	@echo "... Tracking/Tracking.s"
 .PHONY : help
 
 

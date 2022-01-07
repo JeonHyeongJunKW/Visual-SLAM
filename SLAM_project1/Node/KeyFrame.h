@@ -67,4 +67,9 @@ class KeyFrame
     void Set_KeyPoint(vector<KeyPoint> arg_keyPoint);
     Mat Get_Descriptor(void);
     vector<KeyPoint> Get_keyPoint(void);
+    void Set_Rt(Mat arg_R, Mat arg_T);
+    void Get_Rt(float * &R_tparam)
+    {
+      R_tparam =this->_pf_camera_R_t;
+    }
 };

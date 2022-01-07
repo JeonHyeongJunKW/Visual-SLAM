@@ -13,5 +13,9 @@ add_executable(KeyFrameViewer KeyFrameMakeAndRelocalization.cpp
                                 Node/KeyFrame.h 
                                 Node/KeyFrame.cpp
                                 Node/CameraTool.h
-                                Node/CameraTool.cpp)
+                                Node/CameraTool.cpp
+                                Tracking/Tracking.h
+                                Tracking/Tracking.cpp
+                                LocalMapping/LocalMapping.h
+                                LocalMapping/LocalMapping.cpp)
 target_link_libraries(KeyFrameViewer ${OpenCV_LIBS} ${DBoW2_LIBS})

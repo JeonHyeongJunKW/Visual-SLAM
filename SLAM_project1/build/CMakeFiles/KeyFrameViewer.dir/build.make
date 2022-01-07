@@ -153,12 +153,62 @@ CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.o.provides: CMakeFiles/KeyFram
 CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.o.provides.build: CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.o
 
 
+CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.o: CMakeFiles/KeyFrameViewer.dir/flags.make
+CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.o: ../Tracking/Tracking.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jeon/visual_slam/Visual-SLAM/SLAM_project1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Building CXX object CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.o -c /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/Tracking/Tracking.cpp
+
+CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/Tracking/Tracking.cpp > CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.i
+
+CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/Tracking/Tracking.cpp -o CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.s
+
+CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.o.requires:
+
+.PHONY : CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.o.requires
+
+CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.o.provides: CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.o.requires
+	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.o.provides.build
+.PHONY : CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.o.provides
+
+CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.o.provides.build: CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.o
+
+
+CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.o: CMakeFiles/KeyFrameViewer.dir/flags.make
+CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.o: ../LocalMapping/LocalMapping.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jeon/visual_slam/Visual-SLAM/SLAM_project1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_6) "Building CXX object CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.o -c /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/LocalMapping/LocalMapping.cpp
+
+CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/LocalMapping/LocalMapping.cpp > CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.i
+
+CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/LocalMapping/LocalMapping.cpp -o CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.s
+
+CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.o.requires:
+
+.PHONY : CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.o.requires
+
+CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.o.provides: CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.o.requires
+	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.o.provides.build
+.PHONY : CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.o.provides
+
+CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.o.provides.build: CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.o
+
+
 # Object files for target KeyFrameViewer
 KeyFrameViewer_OBJECTS = \
 "CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o" \
 "CMakeFiles/KeyFrameViewer.dir/Node/NodeHandler.cpp.o" \
 "CMakeFiles/KeyFrameViewer.dir/Node/KeyFrame.cpp.o" \
-"CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.o"
+"CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.o" \
+"CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.o" \
+"CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.o"
 
 # External object files for target KeyFrameViewer
 KeyFrameViewer_EXTERNAL_OBJECTS =
@@ -167,6 +217,8 @@ KeyFrameViewer: CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.
 KeyFrameViewer: CMakeFiles/KeyFrameViewer.dir/Node/NodeHandler.cpp.o
 KeyFrameViewer: CMakeFiles/KeyFrameViewer.dir/Node/KeyFrame.cpp.o
 KeyFrameViewer: CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.o
+KeyFrameViewer: CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.o
+KeyFrameViewer: CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.o
 KeyFrameViewer: CMakeFiles/KeyFrameViewer.dir/build.make
 KeyFrameViewer: /usr/lib/x86_64-linux-gnu/libopencv_shape.so.3.2.0
 KeyFrameViewer: /usr/lib/x86_64-linux-gnu/libopencv_stitching.so.3.2.0
@@ -211,7 +263,7 @@ KeyFrameViewer: /usr/lib/x86_64-linux-gnu/libopencv_imgcodecs.so.3.2.0
 KeyFrameViewer: /usr/lib/x86_64-linux-gnu/libopencv_imgproc.so.3.2.0
 KeyFrameViewer: /usr/lib/x86_64-linux-gnu/libopencv_core.so.3.2.0
 KeyFrameViewer: CMakeFiles/KeyFrameViewer.dir/link.txt
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/jeon/visual_slam/Visual-SLAM/SLAM_project1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_5) "Linking CXX executable KeyFrameViewer"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --bold --progress-dir=/home/jeon/visual_slam/Visual-SLAM/SLAM_project1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_7) "Linking CXX executable KeyFrameViewer"
 	$(CMAKE_COMMAND) -E cmake_link_script CMakeFiles/KeyFrameViewer.dir/link.txt --verbose=$(VERBOSE)
 
 # Rule to build all files generated by this target.
@@ -223,6 +275,8 @@ CMakeFiles/KeyFrameViewer.dir/requires: CMakeFiles/KeyFrameViewer.dir/KeyFrameMa
 CMakeFiles/KeyFrameViewer.dir/requires: CMakeFiles/KeyFrameViewer.dir/Node/NodeHandler.cpp.o.requires
 CMakeFiles/KeyFrameViewer.dir/requires: CMakeFiles/KeyFrameViewer.dir/Node/KeyFrame.cpp.o.requires
 CMakeFiles/KeyFrameViewer.dir/requires: CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.o.requires
+CMakeFiles/KeyFrameViewer.dir/requires: CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.o.requires
+CMakeFiles/KeyFrameViewer.dir/requires: CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.o.requires
 
 .PHONY : CMakeFiles/KeyFrameViewer.dir/requires
 

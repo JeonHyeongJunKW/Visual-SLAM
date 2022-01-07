@@ -211,7 +211,7 @@ bool NodeHandler::Make_KeyFrame(Mat arg_KeyFrame)
 {
   //이미지를 받아서 키프레임을 생성합니다. 
   
-  this->_pt_KeyFrames.push_back(new KeyFrame(this->int_CurrentFrameIdx-1, this->_mat_InstrisicParam));
+  this->_pt_KeyFrames.push_back(new KeyFrame(this->int_CurrentFrameIdx-1, this->mat_InstrisicParam));
   KeyFrame* kfp_NewKeyFrame = *(this->_pt_KeyFrames.end()-1);
   //키프레임 노드 생성및 정보를 등록합니다. 
   Mat des;

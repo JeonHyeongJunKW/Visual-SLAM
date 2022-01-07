@@ -66,7 +66,7 @@ CMAKE_BINARY_DIR = /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/build
 CMakeFiles/KeyFrameViewer.dir/all:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/depend
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/build
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/jeon/visual_slam/Visual-SLAM/SLAM_project1/build/CMakeFiles --progress-num=1,2,3,4,5 "Built target KeyFrameViewer"
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/jeon/visual_slam/Visual-SLAM/SLAM_project1/build/CMakeFiles --progress-num=1,2,3,4,5,6,7 "Built target KeyFrameViewer"
 .PHONY : CMakeFiles/KeyFrameViewer.dir/all
 
 # Include target in all.
@@ -76,7 +76,7 @@ all: CMakeFiles/KeyFrameViewer.dir/all
 
 # Build rule for subdir invocation for target.
 CMakeFiles/KeyFrameViewer.dir/rule: cmake_check_build_system
-	$(CMAKE_COMMAND) -E cmake_progress_start /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/build/CMakeFiles 5
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/build/CMakeFiles 7
 	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/KeyFrameViewer.dir/all
 	$(CMAKE_COMMAND) -E cmake_progress_start /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/build/CMakeFiles 0
 .PHONY : CMakeFiles/KeyFrameViewer.dir/rule

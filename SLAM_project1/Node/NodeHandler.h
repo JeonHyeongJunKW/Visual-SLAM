@@ -2,6 +2,7 @@
 #include "KeyFrame.h"
 #include <iostream>
 #include <opencv2/opencv.hpp>
+#include <mutex>
 
 using namespace std;
 using namespace cv;
@@ -23,16 +24,32 @@ class Match_Set
     KeyPoint* kp_first;
     KeyPoint* kp_second;
 };
-
+class NewKeyFrameSet
+{
+  public:
+    NewKeyFrameSet(KeyFrame* arg_NewFrame,
+                  KeyFrame* arg_ReferenceFrame,
+                  vector<Match_Set> arg_matchSet,
+                  vector<int> arg_good_match):
+                  NewFrame(arg_NewFrame),
+                  ReferenceFrame(arg_ReferenceFrame),
+                  matchSet(arg_matchSet),
+                  good_match(arg_good_match)
+                  {}
+    KeyFrame* NewFrame;
+    KeyFrame* ReferenceFrame;
+    vector<Match_Set> matchSet;
+    vector<int> good_match;
+};
 class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다. 
 {
-  private://variable
+  public://variable
     //비교하는 부분을 윈도우를 만들어서 그걸로 비교하자.
     vector<MapPoint*> _pt_MapPoints;//전체 맵포인트가 들어있습니다.
     vector<KeyFrame*> _pt_KeyFrames;//전체 키프레임이 담겨있습니다. 
     vector<KeyFrame*> _pt_LocalWindowKeyFrames;//윈도우 단위로 키 프레임이 담겨있습니다. 키프레임이 일정이상 생기면 일정단위로 삭제합니다. 
     vector<MapPoint*> _pt_LocalWindowMapPoints;//윈도우 단위로 MapPoint를 유지합니다. 키프레임이 일정이상 생기면 일정단위로 삭제합니다. 
-    
+    vector<NewKeyFrameSet*> v_newKeyFrame;
     Ptr<DescriptorMatcher> _match_OrbMatchHandle = BFMatcher::create(NORM_HAMMING);
     Mat _mat_FullDescriptor;//전체 descriptor입니다. 
     Mat _mat_LocalDescriptor; //윈도우 단위로 descriptor를 유지합니다.
@@ -41,12 +58,12 @@ class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다.
     int int_LastKeyFrameIdx = -1;
 
     bool _b_IsSetInstricParam= false;
-    Mat _mat_InstrisicParam;
+    Mat mat_InstrisicParam;
     int _int_MapPointIdx = 0;
     int _int_FrameThreshold = 20;
     int _int_LocalWindowSize =20;
     vector<Match_Set*> _local_MatchSet;
-
+    mutex m_sharedlock;
   public://constructor 
     NodeHandler();
     NodeHandler(int arg_FrameThreshold);
@@ -61,7 +78,7 @@ class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다.
 
   public://method
     void Set_InstricParam(float arg_f_x, float arg_f_y, float arg_skef_cf_x, float arg_c_x, float arg_c_y) {
-      _mat_InstrisicParam =(Mat_<float>(3,3) <<arg_f_x,arg_skef_cf_x,arg_c_x,0,arg_f_y,arg_c_y,0,0,1);
+      mat_InstrisicParam =(Mat_<float>(3,3) <<arg_f_x,arg_skef_cf_x,arg_c_x,0,arg_f_y,arg_c_y,0,0,1);
       _b_IsSetInstricParam =true;
       }
     bool Make_MapPoint_pix2pixMatch(Mat arg_descriptor,vector<KeyPoint> arg_KeyPoint, KeyFrame* arg_KeyFrame);
@@ -71,7 +88,13 @@ class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다.
     bool MakeMapPoint(KeyFrame* kfp_beforeFrame, KeyFrame* kfp_afterFrame);
 
     vector<KeyFrame*> Get_LocalKeyFrame(void);
-    bool ValidateHomography(vector<Point2f> &arg_kp1, vector<Point2f> &arg_kp2, Mat InstrincParam,Mat& R, Mat& t, float score);
     bool Vector2Mat_p2fMat(vector<Point2f> arg_vectorpt2, Mat arg_Mat);
-    // void CheckRT(vector<Point2f> current_p2f, vector<Point2f> past_p2f,Mat IntrinsicParam, Mat R, Mat t, int *good_point);
+    bool IsNiceTime();
+    bool GetLastFrame(KeyFrame* &p_lastFrame);
+    bool AddNewKeyFrame(KeyFrame* p_NewFrame);
+    bool SetImageFeature(KeyFrame* p_NewFrame, Mat Image);
+    void SetRt(KeyFrame* p_TempFrame, Mat R,Mat T);
+    void GetRtParam(KeyFrame* p_TempFrame, float* &R_tparam);
+    vector<MapPoint*> Get_localMapPoint();
+    //Todo : 후보키프레임 등록하는부분을 해야함. 기존에 단순히 add하는거랑 다름
 };

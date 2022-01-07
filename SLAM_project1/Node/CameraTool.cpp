@@ -39,7 +39,6 @@ void Custom_undisortionPoints(vector<Point2f> arg_InputPoints, Mat IntrinsicPara
     for(int i=0; i< N; i++)
     {
         Mat tempMat(homoInputPoints[i]);
-        // cout<<tempMat<<endl;
         Mat returnPoint = inv_param*tempMat;//역행렬을 곱해서 homogeneous좌표로 바꿉니다.
         homoOutputPoints.push_back(Point3f(returnPoint));
     }
@@ -60,18 +59,9 @@ void Custom_triangulation(vector<Point2f> arg_InputPoints1,vector<Point2f> arg_I
         Mat x_2(homoInputPoints2[i]);
         x_1.convertTo(x_1, CV_64F);
         x_2.convertTo(x_2, CV_64F);
-        // cout<<x_1.cols<<endl;
-        // cout<<x_2.cols<<endl;
-        // cout<<arg_T.cols<<endl;
-        // cout<<arg_R.cols<<endl;
+
         Mat s_2 = - (x_1.t()*arg_T)/(x_1.t()*arg_R*x_2);
         auto scalar_s_2 = s_2.at<float>(0,0);
-        // cout<<"-------------"<<endl;
-        // cout <<"scalar : "<<scalar_s_2<<endl;
-        // if(i<5)
-        // {
-        //     cout<<"real 3d : "<<scalar_s_2*x_2.t()<<endl;
-        // }
         
     }
 }
@@ -89,12 +79,13 @@ void CheckRT(int solution_idx,
   R.copyTo(projectMatrix(Rect(0,0,3,3)));
   t.copyTo(projectMatrix(Rect(3,0,1,3)));
   Mat InitProjectMatrix = Mat::eye(3,4,CV_64FC1);
-
+  
   Mat dist_coef(1,4,CV_64FC1);//null이나 0값으로 초기화하였다.
   vector<Point2f> Undistorted_current_pt;
   Custom_undisortionPoints(current_p2f,IntrinsicParam,Undistorted_current_pt);//mm단위로 바꿔줍니다.
   vector<Point2f> Undistorted_past_pt;
   Custom_undisortionPoints(past_p2f,IntrinsicParam,Undistorted_past_pt);//mm단위로 바꿔줍니다.
+  
   Mat InstrincParam_64FC1;
   IntrinsicParam.convertTo(InstrincParam_64FC1,CV_64FC1);
   vector<Point3f> Output_pt;
@@ -102,7 +93,7 @@ void CheckRT(int solution_idx,
   triangulatePoints(InitProjectMatrix,projectMatrix,Undistorted_past_pt,Undistorted_current_pt,outputMatrix);
 
   vector<Point3d> points;
-
+  
   for(int point_ind=0; point_ind<outputMatrix.cols; point_ind++)
   {
     Mat x = outputMatrix.col(point_ind);
@@ -248,9 +239,6 @@ void CheckFundamental(vector<Point2f> current_p2f, vector<Point2f> reference_p2f
       Pm_d2 +=(Th-diff);
       is_outlier = false;
     }
-    
-    // cout<<"----------"<<endl;
-    // cout<<diff<<endl;
     Mat projected_reference_p2f = FundamentalMat->t()*Mat(homo_current_p2f[i]);
     Point3f reference_point3f (//현재기준 좌표입니다.
           projected_reference_p2f.at<float>(0,0), 
@@ -275,54 +263,73 @@ void CheckFundamental(vector<Point2f> current_p2f, vector<Point2f> reference_p2f
   *Sf = Pm_d2;
 }
 
-bool ValidateHomographyRt(vector<Point2f> &arg_kp1, vector<Point2f> &arg_kp2, Mat InstrincParam, Mat& R, Mat& t) 
+bool ValidateHomographyRt(vector<Point2f> &arg_kp1, //현재 카메라의 키포인트들의 좌표입니다. arg_kp1과 arg_kp2는 서로 순서대로 매칭되어있습니다.
+                          vector<Point2f> &arg_kp2, //과거 카메라의 키포인트들의 좌표입니다.arg_kp1과 arg_kp2는 서로 순서대로 매칭되어있습니다.
+                          Mat InstrincParam, //카메라의 내개파라미터입니다.(카메라 행렬)
+                          Mat& R, //현재 Homography에 대한 정답 R행렬을 반환합니다.
+                          Mat& t, //현재 Homography에 대한 정답 T행렬을 반환합니다.
+                          vector<int> &good_point_ind, //현재 Homography에 대해서 좋은 매칭을 가지는 점의 인덱스를 반환합니다. 인덱스는 arg_kp1과 arg_kp2내에서의 인덱스를 의미합니다.
+                          vector<Point3d> &current_good_point_3d) //현재 Homography에 대해서 좋은 매칭을 가지는 점의 3차원점을 반환합니다. 3차원점은 현재 카메라 좌표계를 기준으로 반환됩니다. 
 {
-  Mat H = findHomography(arg_kp2, arg_kp1, RANSAC);
-  vector<Mat> Rs_decomp;
-  vector<Mat> Ts_decomp;
-  vector<Mat> Normals_decomp;
-  int solutions = decomposeHomographyMat(H,InstrincParam,Rs_decomp,Ts_decomp,Normals_decomp);//반환해주는 변환은 계사이의 변환이기 때문에 기존의 R,t의 변환이다. 
-  vector<int> good_point_ind_0;
-  vector<int> good_point_ind_1;
-  vector<int> good_point_ind_2;
-  vector<int> good_point_ind_3;
-  vector<Point3d> current_good_point_3d_0;
-  vector<Point3d> current_good_point_3d_1;
-  vector<Point3d> current_good_point_3d_2;
-  vector<Point3d> current_good_point_3d_3;
-  thread threads[4];
+  Mat H = findHomography(arg_kp2, arg_kp1, RANSAC);//현재 Homography입니다. Opencv의 내장함수를 통해서 빠르게 구하며, RANSAC을 사용하여 구합니다.
+  vector<Mat> Rs_decomp; //Homography를 decompose하여 R행렬의 4가지의 해 후보를 얻습니다. 
+  vector<Mat> Ts_decomp; //Homography를 decompose하여 T행렬의 4가지의 해 후보를 얻습니다. 
+  vector<Mat> Normals_decomp; //Homography를 decompose하여 N행렬의 4가지의 해 후보를 얻습니다. 
+
+  int solutions = decomposeHomographyMat(H,InstrincParam,Rs_decomp,Ts_decomp,Normals_decomp);//Homography matrix를 decompose하여 4가지해를 얻습니다. 반환값은 해의개수(=4)입니다.
+  vector<int> good_point_ind_0; //0번해에 대해서 좋은매칭을 가지는 점의 인덱스 배열(벡터)입니다. arg_kp1에서의 인덱스입니다.
+  vector<int> good_point_ind_1;//1번해에 대해서 좋은매칭을 가지는 점의 인덱스 배열(벡터)입니다. arg_kp1에서의 인덱스입니다.
+  vector<int> good_point_ind_2;//2번해에 대해서 좋은매칭을 가지는 점의 인덱스 배열(벡터)입니다. arg_kp1에서의 인덱스입니다.
+  vector<int> good_point_ind_3;//3번해에 대해서 좋은매칭을 가지는 점의 인덱스 배열(벡터)입니다. arg_kp1에서의 인덱스입니다.
+  vector<Point3d> current_good_point_3d_0; //0번해에 대해서 좋은매칭을 가지는 점의 3차원 좌표배열(벡터)입니다. good_point_ind_0에서의 인덱스에 해당하는점에대한 3차원점입니다.
+  vector<Point3d> current_good_point_3d_1;//1번해에 대해서 좋은매칭을 가지는 점의 3차원 좌표배열(벡터)입니다. good_point_ind_1에서의 인덱스에 해당하는점에대한 3차원점입니다.
+  vector<Point3d> current_good_point_3d_2;//2번해에 대해서 좋은매칭을 가지는 점의 3차원 좌표배열(벡터)입니다. good_point_ind_2에서의 인덱스에 해당하는점에대한 3차원점입니다.
+  vector<Point3d> current_good_point_3d_3;//3번해에 대해서 좋은매칭을 가지는 점의 3차원 좌표배열(벡터)입니다. good_point_ind_3에서의 인덱스에 해당하는점에대한 3차원점입니다.
+  thread threads[4];//4가지의 thread로 각 해에 대한 답을 얻습니다. 
   threads[0] =  thread(CheckRT,0,arg_kp1,arg_kp2,InstrincParam,Rs_decomp[0],Ts_decomp[0], &good_point_ind_0,&current_good_point_3d_0); 
   threads[1] =  thread(CheckRT,1,arg_kp1,arg_kp2,InstrincParam,Rs_decomp[1],Ts_decomp[1], &good_point_ind_1,&current_good_point_3d_1); 
   threads[2] =  thread(CheckRT,2,arg_kp1,arg_kp2,InstrincParam,Rs_decomp[2],Ts_decomp[2], &good_point_ind_2,&current_good_point_3d_2); 
   threads[3] =  thread(CheckRT,3,arg_kp1,arg_kp2,InstrincParam,Rs_decomp[3],Ts_decomp[3], &good_point_ind_3,&current_good_point_3d_3); 
-  int good_points[4] ={0,0,0,0};
+  int good_points[4] ={0,0,0,0}; //각 해에 대해서 3차원 재투영등의 검사로 좋은 매칭 및 triangulation이 잘된 점들의 갯수를 저장하는 배열입니다.
   for(int i=0; i<4; i++)
   {
     threads[i].join();
   }
-  good_points[0] = good_point_ind_0.size();
-  good_points[1] = good_point_ind_1.size();
-  good_points[2] = good_point_ind_2.size();
-  good_points[3] = good_point_ind_3.size();
+  vector<vector<int>> current_good_points_ind;//좋은매칭을 가지는 점의 인덱스 배열(벡터)를 모두 저장하는 벡터입니다.
+  current_good_points_ind.push_back(good_point_ind_0);
+  current_good_points_ind.push_back(good_point_ind_1);
+  current_good_points_ind.push_back(good_point_ind_2);
+  current_good_points_ind.push_back(good_point_ind_3);
+
+  vector<vector<Point3d>> current_good_points_3d;//좋은매칭을 가지는 점의 3차원 좌표배열(벡터)를 모두 저장하는 벡터입니다.
+  current_good_points_3d.push_back(current_good_point_3d_0);
+  current_good_points_3d.push_back(current_good_point_3d_1);
+  current_good_points_3d.push_back(current_good_point_3d_2);
+  current_good_points_3d.push_back(current_good_point_3d_3);
   int max_ind =-1;
   int good_point_size =-1;
+  //가장 매칭점을 많이 갖는 해를 정답인 해로 결정합니다.
   for(int j=0; j<4; j++)
   {
-    if(good_points[j]>good_point_size)
+    if(current_good_points_ind[j].size() - good_point_size>0)
     {
       max_ind =j;
-      good_point_size= good_points[j];
+      good_point_size= current_good_points_ind[j].size();
     }
   }
+
+  //만약에 없다면, 코드를 종료합니다. 
   if(max_ind == -1)
   {
     cout<<" 호모그래피에서 매칭되는 점이 하나도 없습니다. 종료"<<endl;
     exit(0);
   }
   else
-  {
+  {//만약에 있다면, R,t, 매칭점인덱스, 3차원 매칭점을 반환합니다.  
     R = Rs_decomp[max_ind];
     t = Ts_decomp[max_ind];
+    good_point_ind = current_good_points_ind[max_ind];
+    current_good_point_3d = current_good_points_3d[max_ind];
   }
   
 }
@@ -331,7 +338,9 @@ bool ValidateFundamentalRt(vector<Point2f> &arg_kp1,
                         vector<Point2f> &arg_kp2, 
                         Mat InstrincParam,
                         Mat& R, 
-                        Mat& t) 
+                        Mat& t,
+                        vector<int> &good_point_ind, //현재 Fundamental에 대해서 좋은 매칭을 가지는 점의 인덱스를 반환합니다. 인덱스는 arg_kp1과 arg_kp2내에서의 인덱스를 의미합니다.
+                        vector<Point3d> &current_good_point_3d) //현재 Fundamental에 대해서 좋은 매칭을 가지는 점의 3차원점을 반환합니다. 3차원점은 현재 카메라 좌표계를 기준으로 반환됩니다.  
 {
   Mat opencv_essential_mat;
   opencv_essential_mat=findEssentialMat(arg_kp2,arg_kp1,InstrincParam);
@@ -339,8 +348,6 @@ bool ValidateFundamentalRt(vector<Point2f> &arg_kp1,
   Mat outputT;
   Mat Mask;
   recoverPose(opencv_essential_mat,arg_kp2,arg_kp1,InstrincParam,outputR,outputT,Mask);
-  vector<int> good_point_ind;
-  vector<Point3d> current_good_point_3d;
   thread threads;
   threads =  thread(CheckRT,4,arg_kp1,arg_kp2,InstrincParam,outputR,outputT, &good_point_ind,&current_good_point_3d); 
   threads.join();
@@ -354,7 +361,6 @@ void ExtractPoint2D(char* filename, vector<Point2f> &extracted_point2d, int &ima
   extracted_point2d.clear();//기존에 들어있는 점을 지웁니다.
   ifstream poseFile;
   poseFile.open(filename);
-  // cout<<filename<<endl;
   if(poseFile.is_open())
   {
     while(!poseFile.eof())
@@ -392,7 +398,6 @@ void ExtractPoint2D(char* filename, vector<Point2f> &extracted_point2d, int &ima
         min_point_y = point->y;
       }
   }
-  // cout <<" minimum x : "<<min_point_x <<", minimum y : "<<min_point_y<<", maximum x : "<<max_point_x <<", maximum y : "<<max_point_y<<endl;
   image_width = (int)((max_point_x- min_point_x)*3+20);//좌우로 10칸씩 추가하였다. 
   image_height = (int)(max_point_y - min_point_y)*30+20;//좌우로 10칸씩 추가하였다. 행은 10배로 늘렸다.
   arg_min_point_x = min_point_x;

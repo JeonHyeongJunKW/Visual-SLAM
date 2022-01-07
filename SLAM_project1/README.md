@@ -37,7 +37,7 @@
     - (추가예정) Global relocalization
 
   - localMapping.cpp
-    -키프레임에 대한 DBOW 등록 및 local bundle adjustment수행
+    - 키프레임에 대한 DBOW 등록 및 local bundle adjustment수행
 
   - DBoW2 : 기존의 ORB feaure의 Database 및 Visual word를 사용할 수 있게 하였다. (21-12-27)
     

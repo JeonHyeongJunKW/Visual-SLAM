@@ -27,13 +27,17 @@ void CheckFundamental(vector<Point2f> current_p2f,
                     Mat *FundamentalMat,
                     vector<int> *inliers);
 
-bool ValidateHomographyRt(vector<Point2f> &arg_kp1, 
-                        vector<Point2f> &arg_kp2, 
-                        Mat InstrincParam,
-                        Mat& R, 
-                        Mat& t);
+bool ValidateHomographyRt(vector<Point2f> &arg_kp1, //현재 카메라의 키포인트들의 좌표입니다. arg_kp1과 arg_kp2는 서로 순서대로 매칭되어있습니다.
+                        vector<Point2f> &arg_kp2, //과거 카메라의 키포인트들의 좌표입니다.arg_kp1과 arg_kp2는 서로 순서대로 매칭되어있습니다.
+                        Mat InstrincParam,//카메라의 내부파라미터입니다.(카메라 행렬)
+                        Mat& R, //현재 Homography에 대한 정답 R행렬을 반환합니다.
+                        Mat& t,//현재 Homography에 대한 정답 T행렬을 반환합니다.
+                        vector<int> &good_point_ind, //현재 Homography에 대해서 좋은 매칭을 가지는 점의 인덱스를 반환합니다. 인덱스는 arg_kp1과 arg_kp2내에서의 인덱스를 의미합니다.
+                        vector<Point3d> &current_good_point_3d); //현재 Homography에 대해서 좋은 매칭을 가지는 점의 3차원점을 반환합니다. 3차원점은 현재 카메라 좌표계를 기준으로 반환됩니다. 
 bool ValidateFundamentalRt(vector<Point2f> &arg_kp1, 
                         vector<Point2f> &arg_kp2, 
                         Mat InstrincParam,
                         Mat& R, 
-                        Mat& t);
+                        Mat& t,
+                        vector<int> &good_point_ind, //현재 Fundamental에 대해서 좋은 매칭을 가지는 점의 인덱스를 반환합니다. 인덱스는 arg_kp1과 arg_kp2내에서의 인덱스를 의미합니다.
+                        vector<Point3d> &current_good_point_3d); //현재 Fundamental에 대해서 좋은 매칭을 가지는 점의 3차원점을 반환합니다. 3차원점은 현재 카메라 좌표계를 기준으로 반환됩니다. 

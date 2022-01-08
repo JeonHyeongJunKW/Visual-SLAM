@@ -6,3 +6,4 @@
 using namespace std;
 using namespace cv;
 void LocalMapping(NodeHandler &nodehandler);
+Mat load_origin_pose(const char* filename);

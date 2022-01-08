@@ -11,11 +11,11 @@ void tracking_thread(NodeHandler& nodehandler)
 {   
     vector<cv::String> file_names;
     glob("/media/jeon/T7/Kitti dataset/data_odometry_gray/dataset/sequences/00/image_0/*.png", file_names, false);
-
+    
     for(int camera_ind=0; camera_ind<file_names.size(); camera_ind++)
     { 
         Mat candidate_image = imread(file_names[camera_ind],IMREAD_GRAYSCALE);//전체 파일들을 불러옵니다.
-        imshow("camera image",candidate_image);
+        // imshow("camera image",candidate_image);
         bool b_IsNiceTime = nodehandler.IsNiceTime();//키프레임 넣은 후에 적당한 시간이 지났는지 검사합니다. 
         if(b_IsNiceTime)
         {
@@ -24,7 +24,7 @@ void tracking_thread(NodeHandler& nodehandler)
                                                   nodehandler.mat_InstrisicParam);//해당 키프레임 포인터 가져오고
           KeyFrame* kfp_LastFrame;
           bool b_IsHaveLocalFrame = nodehandler.GetLastFrame(kfp_LastFrame);//마지막으로 키프레임으로 등록한 프레임을 가져옵니다. 
-          cout<<"kfp last frame : "<<kfp_LastFrame<<endl;
+          
           nodehandler.SetImageFeature(kfp_TempFrame,candidate_image);//현재 프레임 정보를 등록합니다.
           if(!b_IsHaveLocalFrame)//초기 키프레임이 없다면 초기프레임을 등록합니다. 
           {
@@ -35,7 +35,7 @@ void tracking_thread(NodeHandler& nodehandler)
           Mat Initial_R;
           Mat Initial_T;
           NewKeyFrameSet* Reference_matches = new NewKeyFrameSet();//마지막점과의 매칭 관계를 저장한다.
-
+          // cout<<"현재 프레임 이름 : "<<kfp_TempFrame->Get_KeyIndex()<<" 나중 프레임 이름" <<kfp_LastFrame->Get_KeyIndex()<<endl;
           GetInitialRt(nodehandler,
                       kfp_TempFrame,
                       kfp_LastFrame,
@@ -60,7 +60,7 @@ void tracking_thread(NodeHandler& nodehandler)
             nodehandler.AddNewKeyFrame(kfp_TempFrame);//노드 핸들러에 새프레임을 등록합니다.
           }
         }
-        waitKey(1);
+        // waitKey(1);
     }
     
 }
@@ -74,9 +74,13 @@ bool GetInitialRt(NodeHandler &nodehandler, //노드(키프레임, 맵포인트)
 {
     KeyFrame* lastFrame = kfp_LastFrame;
     vector<vector<DMatch>> matches;//매치를 저장할 변수입니다.
-    nodehandler._match_OrbMatchHandle->knnMatch(kfp_NewFrame->Get_Descriptor(),kfp_LastFrame->Get_Descriptor(),matches,2);//쿼리 디스크립터를 찾습니다. 
+    nodehandler._match_OrbMatchHandle->knnMatch(kfp_NewFrame->Get_Descriptor(),
+                                              kfp_LastFrame->Get_Descriptor(),
+                                              matches,
+                                              2);//쿼리 디스크립터를 찾습니다. 
     //initial pose estimation from last frame
     vector<DMatch> good_matches;//좋은 매치만 저장됩니다.
+    sort(matches.begin(),matches.end());
     const float ratio_thresh = 0.65f;
     for (size_t i = 0; i < matches.size(); i++){
       if (matches[i][0].distance < ratio_thresh * matches[i][1].distance)//query -> first
@@ -84,7 +88,7 @@ bool GetInitialRt(NodeHandler &nodehandler, //노드(키프레임, 맵포인트)
         good_matches.push_back(matches[i][0]);
       }
     }
-    if(good_matches.size()<5)//현재 로컬프레임과의 매칭이 잘되었는지 확인합니다. 
+    if(good_matches.size()<15)//현재 로컬프레임과의 매칭이 잘되었는지 확인합니다. 
     {
       cout<<"relocalization start"<<endl;
       exit(0);
@@ -166,7 +170,6 @@ bool GetInitialRt(NodeHandler &nodehandler, //노드(키프레임, 맵포인트)
     
     R= return_R;
     t =return_T;
-    
     Cu_Re_Matches->CurrentFrame = kfp_NewFrame;
     Cu_Re_Matches->ReferenceFrame = kfp_LastFrame;
     Cu_Re_Matches->CurrentGoodPoint3D = current_good_point_3d;
@@ -184,6 +187,8 @@ bool GetInitialRt(NodeHandler &nodehandler, //노드(키프레임, 맵포인트)
     Cu_Re_Matches->CurrentGoodPoint2D = CurretGoodPoint2D;
     Cu_Re_Matches->ReferenceGoodPoint2D = ReferenceGoodPoint2D;
     Cu_Re_Matches->descriptor = descriptor;
+    Cu_Re_Matches->R =R;
+    Cu_Re_Matches->t =t;
 }
 
 

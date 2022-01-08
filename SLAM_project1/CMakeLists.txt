@@ -7,7 +7,7 @@ find_package(DBoW2 REQUIRED)
 # helloworld
 include_directories(${OpenCV_INCLUDE_DIRS} ${DBoW2_INCLUDE_DIRS})
 SET(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pthread")
-add_executable(KeyFrameViewer KeyFrameMakeAndRelocalization.cpp 
+add_executable(KeyFrameViewer KeyFrameMakeAndVisualOdometry.cpp
                                 Node/NodeHandler.cpp 
                                 Node/NodeHandler.h 
                                 Node/KeyFrame.h 

@@ -4,7 +4,19 @@
 
 using namespace std;
 using namespace cv;
-void ExtractPoint2D(char* filename, vector<Point2f> &extracted_point2d, int &image_width, int &image_height, float &arg_min_point_x, float& arg_min_point_y);
+void ExtractPoint2D(char* filename, 
+                    vector<Point2f> &extracted_point2d, 
+                    int &image_width, 
+                    int &image_height, 
+                    float &arg_min_point_x, 
+                    float& arg_min_point_y);
+void ExtractPoint3D(char* filename, 
+                    vector<Point3f> &extracted_point3d, 
+                    int &image_width, 
+                    int &image_height, 
+                    float &arg_min_point_x, 
+                    float& arg_min_point_z);
+
 void Custom_undisortionPoints(vector<Point2f> arg_InputPoints, Mat IntrinsicParam,vector<Point2f> &arg_OuputPoints);
 void Custom_triangulation(vector<Point2f> arg_InputPoints1,vector<Point2f> arg_InputPoints2, Mat arg_R, Mat arg_T,vector<Point3f> &arg_OuputPoints);
 string type2str(int type);

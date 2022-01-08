@@ -61,6 +61,7 @@ class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다.
     int _int_LocalWindowSize =20;
     vector<Match_Set*> _local_MatchSet;
     mutex m_sharedlock;
+    vector<Mat> estimated_pose;
   public://constructor 
     NodeHandler();
     NodeHandler(int arg_FrameThreshold);
@@ -75,7 +76,9 @@ class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다.
 
   public://method
     void Set_InstricParam(float arg_f_x, float arg_f_y, float arg_skef_cf_x, float arg_c_x, float arg_c_y) {
-      mat_InstrisicParam =(Mat_<float>(3,3) <<arg_f_x,arg_skef_cf_x,arg_c_x,0,arg_f_y,arg_c_y,0,0,1);
+      mat_InstrisicParam =(Mat_<float>(3,3) <<arg_f_x,arg_skef_cf_x,arg_c_x,
+                                              0,arg_f_y,arg_c_y,
+                                              0,0,1);
       _b_IsSetInstricParam =true;
       }
     bool Make_MapPoint_pix2pixMatch(Mat arg_descriptor,vector<KeyPoint> arg_KeyPoint, KeyFrame* arg_KeyFrame);

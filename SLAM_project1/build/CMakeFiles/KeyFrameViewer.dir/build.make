@@ -57,28 +57,28 @@ include CMakeFiles/KeyFrameViewer.dir/progress.make
 # Include the compile flags for this target's objects.
 include CMakeFiles/KeyFrameViewer.dir/flags.make
 
-CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o: CMakeFiles/KeyFrameViewer.dir/flags.make
-CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o: ../KeyFrameMakeAndRelocalization.cpp
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jeon/visual_slam/Visual-SLAM/SLAM_project1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o"
-	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o -c /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/KeyFrameMakeAndRelocalization.cpp
+CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.o: CMakeFiles/KeyFrameViewer.dir/flags.make
+CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.o: ../KeyFrameMakeAndVisualOdometry.cpp
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green --progress-dir=/home/jeon/visual_slam/Visual-SLAM/SLAM_project1/build/CMakeFiles --progress-num=$(CMAKE_PROGRESS_1) "Building CXX object CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.o"
+	/usr/bin/c++  $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -o CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.o -c /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/KeyFrameMakeAndVisualOdometry.cpp
 
-CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.i: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.i"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/KeyFrameMakeAndRelocalization.cpp > CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.i
+CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.i: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Preprocessing CXX source to CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.i"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -E /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/KeyFrameMakeAndVisualOdometry.cpp > CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.i
 
-CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.s: cmake_force
-	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.s"
-	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/KeyFrameMakeAndRelocalization.cpp -o CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.s
+CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.s: cmake_force
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --green "Compiling CXX source to assembly CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.s"
+	/usr/bin/c++ $(CXX_DEFINES) $(CXX_INCLUDES) $(CXX_FLAGS) -S /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/KeyFrameMakeAndVisualOdometry.cpp -o CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.s
 
-CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o.requires:
+CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.o.requires:
 
-.PHONY : CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o.requires
+.PHONY : CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.o.requires
 
-CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o.provides: CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o.requires
-	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o.provides.build
-.PHONY : CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o.provides
+CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.o.provides: CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.o.requires
+	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.o.provides.build
+.PHONY : CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.o.provides
 
-CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o.provides.build: CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o
+CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.o.provides.build: CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.o
 
 
 CMakeFiles/KeyFrameViewer.dir/Node/NodeHandler.cpp.o: CMakeFiles/KeyFrameViewer.dir/flags.make
@@ -203,7 +203,7 @@ CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.o.provides.build: CM
 
 # Object files for target KeyFrameViewer
 KeyFrameViewer_OBJECTS = \
-"CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o" \
+"CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.o" \
 "CMakeFiles/KeyFrameViewer.dir/Node/NodeHandler.cpp.o" \
 "CMakeFiles/KeyFrameViewer.dir/Node/KeyFrame.cpp.o" \
 "CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.o" \
@@ -213,7 +213,7 @@ KeyFrameViewer_OBJECTS = \
 # External object files for target KeyFrameViewer
 KeyFrameViewer_EXTERNAL_OBJECTS =
 
-KeyFrameViewer: CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o
+KeyFrameViewer: CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.o
 KeyFrameViewer: CMakeFiles/KeyFrameViewer.dir/Node/NodeHandler.cpp.o
 KeyFrameViewer: CMakeFiles/KeyFrameViewer.dir/Node/KeyFrame.cpp.o
 KeyFrameViewer: CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.o
@@ -271,7 +271,7 @@ CMakeFiles/KeyFrameViewer.dir/build: KeyFrameViewer
 
 .PHONY : CMakeFiles/KeyFrameViewer.dir/build
 
-CMakeFiles/KeyFrameViewer.dir/requires: CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o.requires
+CMakeFiles/KeyFrameViewer.dir/requires: CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.o.requires
 CMakeFiles/KeyFrameViewer.dir/requires: CMakeFiles/KeyFrameViewer.dir/Node/NodeHandler.cpp.o.requires
 CMakeFiles/KeyFrameViewer.dir/requires: CMakeFiles/KeyFrameViewer.dir/Node/KeyFrame.cpp.o.requires
 CMakeFiles/KeyFrameViewer.dir/requires: CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.o.requires

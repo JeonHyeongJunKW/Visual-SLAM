@@ -32,28 +32,6 @@ bool NodeHandler::ValidateAndAddFrame(Mat arg_candidateImage)
     this->int_CurrentFrameIdx+=1;
     return false; 
   }
-
-  // //step 2 : 가지고 있는 키포인트의 개수를 구합니다. 
-  
-  // KeyFrame* kfp_TempFrame = new KeyFrame(this->int_CurrentFrameIdx-1, this->_mat_InstrisicParam);//해당 키프레임 포인터 가져오고
-  // //키프레임 노드 생성및 정보를 등록합니다. 
-
-  // Mat des;
-  // vector<KeyPoint> kp_vector;
-  // int kp_size = this->_Get_NumberOfOrbFeature(arg_candidateImage,des,kp_vector);//현재 프레임에 대한 feature들을 얻어온다.
-
-  // //부모키프레임을 등록합니다.
-  // if(!this->_pt_KeyFrames.empty())//부모키프레임이 존재할 수 있다면(이미 하나정도 저장되어있다면)
-  // {
-  //   kfp_TempFrame->Set_FatherKeyFrame(*(_pt_KeyFrames.end()-1));
-  //   (*(_pt_KeyFrames.end()-1))->Set_ChildKeyFrame(kfp_TempFrame);
-  // }
-  // int int_DescriptorSize = 32;
-  // kfp_TempFrame->Set_Descriptor(des);//디스크립터 등록합니다.
-  // kfp_TempFrame->Set_KeyPoint(kp_vector);//키포인터 등록합니다. 
-
-  // Change_Window(kfp_TempFrame);//로컬윈도우를 바꾸면서 매칭을 다시만듭니다. 
-
   this->int_LastKeyFrameIdx = this->int_CurrentFrameIdx-1;
   return true;
 }
@@ -61,7 +39,7 @@ bool NodeHandler::ValidateAndAddFrame(Mat arg_candidateImage)
 
 int NodeHandler::_Get_NumberOfOrbFeature(Mat arg_candidateImage, Mat&des, vector<KeyPoint>& kp)
 {
-  const static auto& _orb_OrbHandle = ORB::create();
+  const static auto& _orb_OrbHandle = ORB::create(500,1.2,8,31,0,2);
   _orb_OrbHandle->detectAndCompute(arg_candidateImage,noArray(),kp,des);
   return kp.size();
 }
@@ -85,6 +63,7 @@ bool NodeHandler::IsNiceTime(void)
   this->int_LastKeyFrameIdx = this->int_CurrentFrameIdx-1;
   return true;
 }
+
 bool NodeHandler::GetLastFrame(KeyFrame* &p_lastFrame)
 {
   this->m_sharedlock.lock();

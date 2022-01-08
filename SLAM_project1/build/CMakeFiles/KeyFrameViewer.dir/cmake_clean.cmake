@@ -1,5 +1,5 @@
 file(REMOVE_RECURSE
-  "CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o"
+  "CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.o"
   "CMakeFiles/KeyFrameViewer.dir/Node/NodeHandler.cpp.o"
   "CMakeFiles/KeyFrameViewer.dir/Node/KeyFrame.cpp.o"
   "CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.o"

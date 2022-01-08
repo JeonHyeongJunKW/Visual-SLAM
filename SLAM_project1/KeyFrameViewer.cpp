@@ -20,7 +20,7 @@ void ExtractPoint2D(char* filename, vector<Point2f> &extracted_point2d, int &ima
       
       getline(poseFile,mat_pose);
       sscanf(mat_pose.c_str(),"%e %e %e %e %e %e %e %e %e %e %e %e",&p1,&p2,&p3,&p4,&p5,&p6,&p7,&p8,&p9,&p10,&p11,&p12);
-      Point2f sample_point = Point2f(p4,p8);//x,y좌표이다.
+      Point2f sample_point = Point2f(p4,p12);//x,y좌표이다.
       extracted_point2d.push_back(sample_point);
     }
   }
@@ -83,12 +83,10 @@ int main(int argc, char** argv)
       nodehandler.Make_KeyFrame(candidate_image);
       circle(map_image,Point(col,row),3,Scalar(0,0,255),1,8,0);
       cout<< (double)(clock()-start)/CLOCKS_PER_SEC<<"초"<<endl;
-      // data[row*map_image.cols + col] = Vec3b(0,0,255);
     }
     else
     {
       data[row*map_image.cols + col] = Vec3b(0,255,0);
-      // circle(map_image,Point(col,row),1,Scalar(0,255,0),1,8,0);
     }
     imshow("map image",map_image);
     

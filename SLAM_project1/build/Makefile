@@ -123,32 +123,32 @@ KeyFrameViewer/fast:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/build
 .PHONY : KeyFrameViewer/fast
 
-KeyFrameMakeAndRelocalization.o: KeyFrameMakeAndRelocalization.cpp.o
+KeyFrameMakeAndVisualOdometry.o: KeyFrameMakeAndVisualOdometry.cpp.o
 
-.PHONY : KeyFrameMakeAndRelocalization.o
+.PHONY : KeyFrameMakeAndVisualOdometry.o
 
 # target to build an object file
-KeyFrameMakeAndRelocalization.cpp.o:
-	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.o
-.PHONY : KeyFrameMakeAndRelocalization.cpp.o
+KeyFrameMakeAndVisualOdometry.cpp.o:
+	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.o
+.PHONY : KeyFrameMakeAndVisualOdometry.cpp.o
 
-KeyFrameMakeAndRelocalization.i: KeyFrameMakeAndRelocalization.cpp.i
+KeyFrameMakeAndVisualOdometry.i: KeyFrameMakeAndVisualOdometry.cpp.i
 
-.PHONY : KeyFrameMakeAndRelocalization.i
+.PHONY : KeyFrameMakeAndVisualOdometry.i
 
 # target to preprocess a source file
-KeyFrameMakeAndRelocalization.cpp.i:
-	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.i
-.PHONY : KeyFrameMakeAndRelocalization.cpp.i
+KeyFrameMakeAndVisualOdometry.cpp.i:
+	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.i
+.PHONY : KeyFrameMakeAndVisualOdometry.cpp.i
 
-KeyFrameMakeAndRelocalization.s: KeyFrameMakeAndRelocalization.cpp.s
+KeyFrameMakeAndVisualOdometry.s: KeyFrameMakeAndVisualOdometry.cpp.s
 
-.PHONY : KeyFrameMakeAndRelocalization.s
+.PHONY : KeyFrameMakeAndVisualOdometry.s
 
 # target to generate assembly for a file
-KeyFrameMakeAndRelocalization.cpp.s:
-	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndRelocalization.cpp.s
-.PHONY : KeyFrameMakeAndRelocalization.cpp.s
+KeyFrameMakeAndVisualOdometry.cpp.s:
+	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/KeyFrameMakeAndVisualOdometry.cpp.s
+.PHONY : KeyFrameMakeAndVisualOdometry.cpp.s
 
 LocalMapping/LocalMapping.o: LocalMapping/LocalMapping.cpp.o
 
@@ -294,9 +294,9 @@ help:
 	@echo "... rebuild_cache"
 	@echo "... KeyFrameViewer"
 	@echo "... edit_cache"
-	@echo "... KeyFrameMakeAndRelocalization.o"
-	@echo "... KeyFrameMakeAndRelocalization.i"
-	@echo "... KeyFrameMakeAndRelocalization.s"
+	@echo "... KeyFrameMakeAndVisualOdometry.o"
+	@echo "... KeyFrameMakeAndVisualOdometry.i"
+	@echo "... KeyFrameMakeAndVisualOdometry.s"
 	@echo "... LocalMapping/LocalMapping.o"
 	@echo "... LocalMapping/LocalMapping.i"
 	@echo "... LocalMapping/LocalMapping.s"

@@ -9,7 +9,7 @@
   - 10fps단위로 찍힌 시퀀스이다. 
 
 
-- VisualizeOdometry.cpp : 실제 정답 Odometry를 시각화합니다. 주의) 행의 좌표는 확대해서 그립니다.(21-12-16)
+- VisualizeOdometry.cpp : 실제 정답 Odometry를 시각화합니다. 주의) 행의 좌표는 확대해서 그립니다. (x,y 좌표를 시각화함)(21-12-16)
 
 <img width ="600" src="https://user-images.githubusercontent.com/63538314/146316571-60f79765-8e3e-4506-af88-35fc96511184.gif">
 
@@ -23,7 +23,10 @@
 - KeyFrameViewer.cpp : 키프레임과 맵포인트를 얻습니다. 
   - 로컬맵에서 유지하는 프레임은 고정된 갯수로하였다.
 
-- KeyFrameMakeAndRelocalization.cpp : 키프레임 및 맵포인트를 생성하고, 트랙킹이 실패할경우 리로컬라이제이션을 넣음,
+- ~~KeyFrameMakeAndRelocalization.cpp : 키프레임 및 맵포인트를 생성하고, 트랙킹이 실패할경우 리로컬라이제이션을 넣음.~~
+
+- KeyFrameMakeAndVisualOdometry.cpp : 키프레임 및 맵포인트를 생성하고, homography와 fundamental matrix를 기반으로 odoemtry를 생성
+
   ### 목표 
   - NodeHandlerWithStatic.cpp
     - 기존에 정적인 프레임 수를 저장하는방식입니다.
@@ -39,11 +42,24 @@
   - localMapping.cpp
     - 키프레임에 대한 DBOW 등록 및 local bundle adjustment수행
 
-  - DBoW2 : 기존의 ORB feaure의 Database 및 Visual word를 사용할 수 있게 하였다. (21-12-27)
+  - ~~DBoW2 : 기존의 ORB feaure의 Database 및 Visual word를 사용할 수 있게 하였다. (21-12-27)~~ 
+
+
     
   <img width ="600" src="https://user-images.githubusercontent.com/63538314/147348554-440c3006-0f46-4c82-a7d3-51ed69bc46b9.gif">
   
-  : 빨간색은 키포인트들의 좌표, 파란색은 현재 키포인트에 대하여 맵포인트를 공유하는 키프레임(k1) (21-12-24)
+  : 빨간색은 키포인트들의 좌표, 파란색은 현재 키포인트에 대하여 맵포인트를 공유하는 키프레임(k1) (x,y 좌표를 시각화함) (21-12-24)
+  -> 아래와 같이 변경 
+
+  ![real_last](https://user-images.githubusercontent.com/63538314/148644845-8c6f8d6f-99ab-406a-876d-9db0faa7f7bf.gif)
+
+  - 빨간색은 ground truth 의 좌표, 파란색은 Visual odometry로만 추정된 좌표 (x,z 좌표를 시각화함) (22-01-08)
+
+  - Tracking/Tracking.cpp
+    - tracking을 하기위한 Visual odometry의 R,t초기화 구현됨
+
+  - LocalMapping/LocalMapping.cpp
+    - 키프레임 등록 및 odometry업데이트까지됨
   
 ### KeyFrame이 가진 정보 [형준]
 - 카메라 포즈 및 내부 파라미터

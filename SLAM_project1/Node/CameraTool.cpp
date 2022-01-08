@@ -113,7 +113,8 @@ void CheckRT(int solution_idx,
   {
     Point3d point3d1 = points[point_ind];//3차원점입니다. 과거기준 좌표입니다. 
     Mat point_pose_in_past = Mat(point3d1);
-    Mat estimated_point2 = R*(Mat(point3d1)+t);//현재 기준 좌표입니다.~~~~~~~~~~~~~~~~이부분은 이해가 안됨
+    Mat estimated_point2 = R*(Mat(point3d1)+t);//현재 기준 좌표
+
     Mat PastNormal = point_pose_in_past - PastPt;
     Mat CurrentNormal =point_pose_in_past - estimated_point2;
     float past_dist = norm(PastNormal);
@@ -213,7 +214,7 @@ void CheckFundamental(vector<Point2f> current_p2f, vector<Point2f> reference_p2f
 {
   float Th = 5.99;
   float Tf = 3.84;
-  Mat EssentialMat = findEssentialMat(reference_p2f, current_p2f, InstrinicParam);
+  Mat EssentialMat = findEssentialMat(reference_p2f, current_p2f, InstrinicParam,RANSAC);
   EssentialMat.convertTo(EssentialMat,CV_32FC1);
   *FundamentalMat = (InstrinicParam.t()).inv()*EssentialMat*InstrinicParam.inv();
   
@@ -347,7 +348,8 @@ bool ValidateFundamentalRt(vector<Point2f> &arg_kp1,
   Mat outputR;
   Mat outputT;
   Mat Mask;
-  recoverPose(opencv_essential_mat,arg_kp2,arg_kp1,InstrincParam,outputR,outputT,Mask);
+  // recoverPose(opencv_essential_mat,arg_kp2,arg_kp1,InstrincParam,outputR,outputT,Mask);
+  recoverPose(opencv_essential_mat,arg_kp2,arg_kp1,InstrincParam,outputR,outputT);
   thread threads;
   threads =  thread(CheckRT,4,arg_kp1,arg_kp2,InstrincParam,outputR,outputT, &good_point_ind,&current_good_point_3d); 
   threads.join();
@@ -402,4 +404,57 @@ void ExtractPoint2D(char* filename, vector<Point2f> &extracted_point2d, int &ima
   image_height = (int)(max_point_y - min_point_y)*30+20;//좌우로 10칸씩 추가하였다. 행은 10배로 늘렸다.
   arg_min_point_x = min_point_x;
   arg_min_point_y = min_point_y;
+}
+
+void ExtractPoint3D(char* filename, 
+                    vector<Point3f> &extracted_point3d, 
+                    int &image_width, 
+                    int &image_height, 
+                    float &arg_min_point_x, 
+                    float &arg_min_point_z) 
+{
+  extracted_point3d.clear();//기존에 들어있는 점을 지웁니다.
+  ifstream poseFile;
+  poseFile.open(filename);
+  if(poseFile.is_open())
+  {
+    while(!poseFile.eof())
+    {
+      string mat_pose;
+      float p1,p2,p3,p4,p5,p6,p7,p8,p9,p10,p11,p12;
+      
+      getline(poseFile,mat_pose);
+      sscanf(mat_pose.c_str(),"%e %e %e %e %e %e %e %e %e %e %e %e",&p1,&p2,&p3,&p4,&p5,&p6,&p7,&p8,&p9,&p10,&p11,&p12);
+      Point3f sample_point = Point3f(p4,p8,p12);//x,y좌표이다.
+      extracted_point3d.push_back(sample_point);
+    }
+  }
+
+  float max_point_x = -10000;
+  float min_point_x = 10000;
+  float max_point_z = -10000;
+  float min_point_z = 10000;
+  for(auto point = extracted_point3d.begin(); point != extracted_point3d.end(); point++)
+  {
+      if(point->x > max_point_x)
+      {
+        max_point_x = point->x;
+      }
+      if(point->z > max_point_z)
+      {
+        max_point_z = point->z;
+      }
+      if(point->x < min_point_x)
+      {
+        min_point_x = point->x;
+      }
+      if(point->z < min_point_z)
+      {
+        min_point_z = point->z;
+      }
+  }
+  image_width = (int)((max_point_x- min_point_x)*1+20);//좌우로 10칸씩 추가하였다. 
+  image_height = (int)(max_point_z - min_point_z)*1+20;//좌우로 10칸씩 추가하였다. 행은 10배로 늘렸다.
+  arg_min_point_x = min_point_x;
+  arg_min_point_z = min_point_z;
 }

@@ -86,3 +86,49 @@ void KeyFrame::Add_MapPoint(MapPoint* arg_MapPoint)
 {
   this->_pmappoint_OwnedMapPoint.push_back(arg_MapPoint);
 }
+
+void KeyFrame::Set_Descriptor(Mat arg_descriptors)
+{
+  this->_mat_descriptors = arg_descriptors;
+}
+
+void KeyFrame::Set_KeyPoint(vector<KeyPoint> arg_keyPoint)
+{
+  this->_vkey_keypoints = arg_keyPoint;
+}
+
+Mat KeyFrame::Get_Descriptor(void)
+{
+  return this->_mat_descriptors;
+}
+vector<KeyPoint> KeyFrame::Get_keyPoint(void)
+{
+  return this->_vkey_keypoints;
+}
+void KeyFrame::Set_Rt(Mat arg_R, Mat arg_T)
+{
+  //포인터 할당합니다.
+  this->_pf_camera_R_t = new float[13];
+  arg_R.convertTo(arg_R, CV_32FC1);
+  arg_T.convertTo(arg_T, CV_32FC1);
+  /*
+  [R | T]가 행단위로 들어가 있다.마지막은 스케일항
+  R00 R01 R02 | T00
+  R11 R11 R12 | T10       => [R00 R01 R02 T00 R11 R11 R12 T10 R20 R21 R22 T20 1]
+  R20 R21 R22 | T20
+  */
+
+  this->_pf_camera_R_t[0] = arg_R.at<float>(0,0);
+  this->_pf_camera_R_t[1] = arg_R.at<float>(0,1);
+  this->_pf_camera_R_t[2] = arg_R.at<float>(0,2);
+  this->_pf_camera_R_t[3] = arg_T.at<float>(0,0);
+  this->_pf_camera_R_t[4] = arg_R.at<float>(1,0);
+  this->_pf_camera_R_t[5] = arg_R.at<float>(1,1);
+  this->_pf_camera_R_t[6] = arg_R.at<float>(1,2);
+  this->_pf_camera_R_t[7] = arg_T.at<float>(1,0);
+  this->_pf_camera_R_t[8] = arg_R.at<float>(2,0);
+  this->_pf_camera_R_t[9] = arg_R.at<float>(2,1);
+  this->_pf_camera_R_t[10] = arg_R.at<float>(2,2);
+  this->_pf_camera_R_t[11] = arg_T.at<float>(2,0);
+  this->_pf_camera_R_t[12] = 1.;
+}

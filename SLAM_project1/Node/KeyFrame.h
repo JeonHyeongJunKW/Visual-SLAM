@@ -30,7 +30,8 @@ class KeyFrame
     KeyFrame* _pkeyframe_Fatherkeyframe;//이 키프레임의 이전 키프레임의 포인터입니다. 키프레임간에 유사도 검사등에 사용됩니다.
     KeyFrame* _pkeyframe_Childkeyframe;//이 키프레임의 다음 키프레임의 포인터입니다. 키프레임간에 유사도 검사등에 사용됩니다.
     float* _pf_camera_R_t;//12개의 파라미터이다.[R | T]가 행단위로 들어가 있다. 추가로 마지막 성분으로 스케일이 들어간다.
-
+    
+    
   public: //constructor method
     KeyFrame(int arg_KeyIndex);
     KeyFrame(int arg_KeyIndex, Mat arg_IntrinsicParam);
@@ -39,6 +40,9 @@ class KeyFrame
 
   public: //method
     //Intrinsic Parameter
+    //각 프레임의 디스크립터와 키포인트를 등록합니다.
+    Mat _mat_descriptors;
+    vector<KeyPoint> _vkey_keypoints;
     void Set_IntrinsicParam(Mat arg_IntrinsicParam); // 키프레임의 내계 파라미터를 바꿉니다. 
     Mat Get_IntrinsicParam(void); // 키프레임의 현재 내계 파라미터를 반환합니다.
 
@@ -59,5 +63,13 @@ class KeyFrame
     int Get_NumMapPoint(); //현재 가지고 있는 맵포인트 
 
     void Add_MapPoint(MapPoint* arg_MapPoint);//키프레임에 맵포인트를 추가합니다. 
-    
+    void Set_Descriptor(Mat arg_descriptors);
+    void Set_KeyPoint(vector<KeyPoint> arg_keyPoint);
+    Mat Get_Descriptor(void);
+    vector<KeyPoint> Get_keyPoint(void);
+    void Set_Rt(Mat arg_R, Mat arg_T);
+    void Get_Rt(float * &R_tparam)
+    {
+      R_tparam =this->_pf_camera_R_t;
+    }
 };

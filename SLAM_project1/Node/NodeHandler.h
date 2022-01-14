@@ -29,11 +29,11 @@ class NewKeyFrameSet
   public:
     KeyFrame* CurrentFrame; //래퍼런스와의 매칭간에 현재 프레임의 포인터입니다.
     KeyFrame* ReferenceFrame;//래퍼런스와의 매칭간에 래퍼런스 프레임의 포인터입니다.
-    vector<Point2f> CurrentGoodPoint2D;//래퍼런스와의 매칭간에 좋은 매칭을 가지는 현재 2d점입니다.
-    vector<Point2f> ReferenceGoodPoint2D;//래퍼런스와의 매칭간에 좋은 매칭을 가지는 레퍼런스 2d점입니다.
+    vector<Point2d> CurrentGoodPoint2D;//래퍼런스와의 매칭간에 좋은 매칭을 가지는 현재 2d점입니다.
+    vector<Point2d> ReferenceGoodPoint2D;//래퍼런스와의 매칭간에 좋은 매칭을 가지는 레퍼런스 2d점입니다.
 
     vector<Point3d> CurrentGoodPoint3D;//래퍼런스와의 매칭간에 좋은 매칭을 가지는 현재 3d점입니다.
-    vector<Mat> descriptor;
+    Mat descriptor;
     Mat R;//래퍼런스와의 매칭간에 좋은 매칭을 가지는 R입니다.
     Mat t;//래퍼런스와의 매칭간에 좋은 매칭을 가지는 t입니다.
 };
@@ -76,25 +76,20 @@ class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다.
 
   public://method
     void Set_InstricParam(float arg_f_x, float arg_f_y, float arg_skef_cf_x, float arg_c_x, float arg_c_y) {
-      mat_InstrisicParam =(Mat_<float>(3,3) <<arg_f_x,arg_skef_cf_x,arg_c_x,
-                                              0,arg_f_y,arg_c_y,
-                                              0,0,1);
-      _b_IsSetInstricParam =true;
-      }
-    bool Make_MapPoint_pix2pixMatch(Mat arg_descriptor,vector<KeyPoint> arg_KeyPoint, KeyFrame* arg_KeyFrame);
-
-    bool ValidateAndAddFrame(Mat arg_candidateImage);
+    mat_InstrisicParam =(Mat_<double>(3,3) <<arg_f_x,arg_skef_cf_x,arg_c_x,
+                                            0,arg_f_y,arg_c_y,
+                                            0,0,1);
+    _b_IsSetInstricParam =true;
+    }
     bool MakeMapPoint(KeyFrame* kfp_beforeFrame, KeyFrame* kfp_afterFrame);
-
-    vector<KeyFrame*> Get_LocalKeyFrame(void);
     bool Vector2Mat_p2fMat(vector<Point2f> arg_vectorpt2, Mat arg_Mat);
     bool IsNiceTime();
     bool GetLastFrame(KeyFrame* &p_lastFrame);
     bool AddNewKeyFrame(KeyFrame* p_NewFrame);
     bool SetImageFeature(KeyFrame* p_NewFrame, Mat Image);
     void SetRt(KeyFrame* p_TempFrame, Mat R,Mat T);
-    void GetRtParam(KeyFrame* p_TempFrame, float* &R_tparam);
+    void GetRtParam(KeyFrame* p_TempFrame, double* &R_tparam);
     vector<MapPoint*> Get_localMapPoint();
     void Add_CandidateKeyFrame(NewKeyFrameSet* matches);
-    //Todo : 후보키프레임 등록하는부분을 해야함. 기존에 단순히 add하는거랑 다름
+    void Match_MapPoint(NewKeyFrameSet *Cu_Re_Matches, Mat camera_global_point);//현재 새로들어온 match set에 대해서 맵포인트의 3차원 좌표를 전체 맵좌표에 의한 변환 및 
 };

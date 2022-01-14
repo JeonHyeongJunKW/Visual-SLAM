@@ -29,18 +29,18 @@ string type2str(int type) {
   return r;
 }
 
-void Custom_undisortionPoints(vector<Point2f> arg_InputPoints, Mat IntrinsicParam,vector<Point2f> &arg_OuputPoints)
+void Custom_undisortionPoints(vector<Point2d> arg_InputPoints, Mat IntrinsicParam,vector<Point2d> &arg_OuputPoints)
 {
     int N = arg_InputPoints.size();
-    vector<Point3f> homoInputPoints;
+    vector<Point3d> homoInputPoints;
     convertPointsToHomogeneous(arg_InputPoints,homoInputPoints);
     Mat inv_param = IntrinsicParam.inv();
-    vector<Point3f> homoOutputPoints;
+    vector<Point3d> homoOutputPoints;
     for(int i=0; i< N; i++)
     {
         Mat tempMat(homoInputPoints[i]);
         Mat returnPoint = inv_param*tempMat;//역행렬을 곱해서 homogeneous좌표로 바꿉니다.
-        homoOutputPoints.push_back(Point3f(returnPoint));
+        homoOutputPoints.push_back(Point3d(returnPoint));
     }
     convertPointsFromHomogeneous(homoOutputPoints,arg_OuputPoints);
 }
@@ -67,41 +67,44 @@ void Custom_triangulation(vector<Point2f> arg_InputPoints1,vector<Point2f> arg_I
 }
 
 void CheckRT(int solution_idx,
-            vector<Point2f> current_p2f, 
-            vector<Point2f> past_p2f,
+            vector<Point2d> current_p2f, 
+            vector<Point2d> past_p2f,
             Mat IntrinsicParam,
             Mat R, 
             Mat t, 
             vector<int> * good_point_ind,
             vector<Point3d> *current_good_point_3d)
 {
-  Mat projectMatrix = Mat(3,4,CV_64FC1);
+  Mat projectMatrix = Mat::zeros(Size(4,3),CV_64FC1);
   R.copyTo(projectMatrix(Rect(0,0,3,3)));
-  t.copyTo(projectMatrix(Rect(3,0,1,3)));
-  Mat InitProjectMatrix = Mat::eye(3,4,CV_64FC1);
   
-  Mat dist_coef(1,4,CV_64FC1);//null이나 0값으로 초기화하였다.
-  vector<Point2f> Undistorted_current_pt;
+  t.copyTo(projectMatrix(Rect(3,0,1,3)));
+  
+  Mat InitProjectMatrix = Mat::eye(3,4,CV_64F);
+  Mat dist_coef = Mat::zeros(1,4,CV_64F);// 0값으로 초기화하였다.
+  vector<Point2d> Undistorted_current_pt;
+  vector<Point2d> Undistorted_past_pt;
+  
+    /* code */
+    
   Custom_undisortionPoints(current_p2f,IntrinsicParam,Undistorted_current_pt);//mm단위로 바꿔줍니다.
-  vector<Point2f> Undistorted_past_pt;
+  
   Custom_undisortionPoints(past_p2f,IntrinsicParam,Undistorted_past_pt);//mm단위로 바꿔줍니다.
   
-  Mat InstrincParam_64FC1;
-  IntrinsicParam.convertTo(InstrincParam_64FC1,CV_64FC1);
+  Mat InstrincParam_64FC1 =IntrinsicParam;
   vector<Point3f> Output_pt;
   Mat outputMatrix;
   triangulatePoints(InitProjectMatrix,projectMatrix,Undistorted_past_pt,Undistorted_current_pt,outputMatrix);
-
   vector<Point3d> points;
   
   for(int point_ind=0; point_ind<outputMatrix.cols; point_ind++)
   {
     Mat x = outputMatrix.col(point_ind);
-    x /= x.at<float>(3,0);
+    x /= x.at<double>(3,0);
     Point3d p (
-          x.at<float>(0,0), 
-          x.at<float>(1,0), 
-          x.at<float>(2,0) 
+          x.at<double>(0,0), 
+          x.at<double>(1,0), 
+          x.at<double>(2,0) 
       );
     points.push_back( p );
   }
@@ -154,16 +157,17 @@ void CheckRT(int solution_idx,
       }
     }
   }
+
 }
 
-void CheckHomography(vector<Point2f> current_p2f, vector<Point2f> reference_p2f,float *Sh,Mat *HomographyMat,vector<int> *inliers) 
+void CheckHomography(vector<Point2d> current_p2f, vector<Point2d> reference_p2f, double *Sh,Mat *HomographyMat,vector<int> *inliers) 
 {
   float Th = 5.99;
 
   Mat H = findHomography(reference_p2f, current_p2f, RANSAC);
-  H.convertTo(*HomographyMat,CV_32FC1);
+  H.convertTo(*HomographyMat,CV_64FC1);
   
-  vector<Point3f> homo_current_p2f, homo_reference_p2f;
+  vector<Point3d> homo_current_p2f, homo_reference_p2f;
   convertPointsToHomogeneous(current_p2f,homo_current_p2f);
   convertPointsToHomogeneous(reference_p2f,homo_reference_p2f);
   double Pm_d2 =0;
@@ -172,10 +176,10 @@ void CheckHomography(vector<Point2f> current_p2f, vector<Point2f> reference_p2f,
     bool is_outlier= true;
     //현재 프레임 좌표를 레퍼런스 프레임 좌표로 투영합니다. 
     Mat projected_currrent_p2f = *HomographyMat*Mat(homo_reference_p2f[i]);
-    Point3f current_point3f (//현재기준 좌표입니다.
-          projected_currrent_p2f.at<float>(0,0), 
-          projected_currrent_p2f.at<float>(1,0), 
-          projected_currrent_p2f.at<float>(2,0) 
+    Point3d current_point3f (//현재기준 좌표입니다.
+          projected_currrent_p2f.at<double>(0,0), 
+          projected_currrent_p2f.at<double>(1,0), 
+          projected_currrent_p2f.at<double>(2,0) 
       );
     current_point3f /=current_point3f.z;
     double diff = pow(norm(homo_current_p2f[i]-current_point3f),2);
@@ -187,10 +191,10 @@ void CheckHomography(vector<Point2f> current_p2f, vector<Point2f> reference_p2f,
     }
 
     Mat projected_reference_p2f = HomographyMat->inv()*Mat(homo_current_p2f[i]);
-    Point3f reference_point3f (//현재기준 좌표입니다.
-          projected_reference_p2f.at<float>(0,0), 
-          projected_reference_p2f.at<float>(1,0), 
-          projected_reference_p2f.at<float>(2,0) 
+    Point3d reference_point3f (//현재기준 좌표입니다.
+          projected_reference_p2f.at<double>(0,0), 
+          projected_reference_p2f.at<double>(1,0), 
+          projected_reference_p2f.at<double>(2,0) 
       );
     reference_point3f /=reference_point3f.z;
     diff = pow(norm(homo_reference_p2f[i]-reference_point3f),2);
@@ -207,18 +211,19 @@ void CheckHomography(vector<Point2f> current_p2f, vector<Point2f> reference_p2f,
       inliers->push_back(i);
     }
   }
+  
   *Sh = Pm_d2;
 }
 
-void CheckFundamental(vector<Point2f> current_p2f, vector<Point2f> reference_p2f,Mat InstrinicParam,float *Sf,Mat *FundamentalMat,vector<int> *inliers) 
+void CheckFundamental(vector<Point2d> current_p2f, vector<Point2d> reference_p2f,Mat InstrinicParam,double *Sf,Mat *FundamentalMat,vector<int> *inliers) 
 {
   float Th = 5.99;
   float Tf = 3.84;
   Mat EssentialMat = findEssentialMat(reference_p2f, current_p2f, InstrinicParam,RANSAC);
-  EssentialMat.convertTo(EssentialMat,CV_32FC1);
+  EssentialMat.convertTo(EssentialMat,CV_64FC1);
   *FundamentalMat = (InstrinicParam.t()).inv()*EssentialMat*InstrinicParam.inv();
   
-  vector<Point3f> homo_current_p2f, homo_reference_p2f;
+  vector<Point3d> homo_current_p2f, homo_reference_p2f;
   convertPointsToHomogeneous(current_p2f,homo_current_p2f);
   convertPointsToHomogeneous(reference_p2f,homo_reference_p2f);
   double Pm_d2 =0;
@@ -227,10 +232,10 @@ void CheckFundamental(vector<Point2f> current_p2f, vector<Point2f> reference_p2f
     bool is_outlier= true;
     //현재 프레임 좌표를 레퍼런스 프레임 좌표로 투영합니다. 
     Mat projected_currrent_p2f = (*FundamentalMat)*Mat(homo_reference_p2f[i]);
-    Point3f current_point3f (//현재기준 좌표입니다.
-          projected_currrent_p2f.at<float>(0,0), 
-          projected_currrent_p2f.at<float>(1,0), 
-          projected_currrent_p2f.at<float>(2,0) 
+    Point3d current_point3f (//현재기준 좌표입니다.
+          projected_currrent_p2f.at<double>(0,0), 
+          projected_currrent_p2f.at<double>(1,0), 
+          projected_currrent_p2f.at<double>(2,0) 
       );
     //homo_current_p2f[i]-current_point3f
     double diff = current_point3f.x*(homo_current_p2f[i].x)+current_point3f.y*(homo_current_p2f[i].y)+current_point3f.z;
@@ -242,9 +247,9 @@ void CheckFundamental(vector<Point2f> current_p2f, vector<Point2f> reference_p2f
     }
     Mat projected_reference_p2f = FundamentalMat->t()*Mat(homo_current_p2f[i]);
     Point3f reference_point3f (//현재기준 좌표입니다.
-          projected_reference_p2f.at<float>(0,0), 
-          projected_reference_p2f.at<float>(1,0), 
-          projected_reference_p2f.at<float>(2,0) 
+          projected_reference_p2f.at<double>(0,0), 
+          projected_reference_p2f.at<double>(1,0), 
+          projected_reference_p2f.at<double>(2,0) 
       );
     diff = reference_point3f.x*(homo_reference_p2f[i].x)+reference_point3f.y*(homo_reference_p2f[i].y)+reference_point3f.z;
     diff = pow(diff,2)/(reference_point3f.x*reference_point3f.x+reference_point3f.y*reference_point3f.y);
@@ -261,11 +266,12 @@ void CheckFundamental(vector<Point2f> current_p2f, vector<Point2f> reference_p2f
       inliers->push_back(i);
     }
   }
+  
   *Sf = Pm_d2;
 }
 
-bool ValidateHomographyRt(vector<Point2f> &arg_kp1, //현재 카메라의 키포인트들의 좌표입니다. arg_kp1과 arg_kp2는 서로 순서대로 매칭되어있습니다.
-                          vector<Point2f> &arg_kp2, //과거 카메라의 키포인트들의 좌표입니다.arg_kp1과 arg_kp2는 서로 순서대로 매칭되어있습니다.
+bool ValidateHomographyRt(vector<Point2d> &arg_kp1, //현재 카메라의 키포인트들의 좌표입니다. arg_kp1과 arg_kp2는 서로 순서대로 매칭되어있습니다.
+                          vector<Point2d> &arg_kp2, //과거 카메라의 키포인트들의 좌표입니다.arg_kp1과 arg_kp2는 서로 순서대로 매칭되어있습니다.
                           Mat InstrincParam, //카메라의 내개파라미터입니다.(카메라 행렬)
                           Mat& R, //현재 Homography에 대한 정답 R행렬을 반환합니다.
                           Mat& t, //현재 Homography에 대한 정답 T행렬을 반환합니다.
@@ -276,46 +282,34 @@ bool ValidateHomographyRt(vector<Point2f> &arg_kp1, //현재 카메라의 키포
   vector<Mat> Rs_decomp; //Homography를 decompose하여 R행렬의 4가지의 해 후보를 얻습니다. 
   vector<Mat> Ts_decomp; //Homography를 decompose하여 T행렬의 4가지의 해 후보를 얻습니다. 
   vector<Mat> Normals_decomp; //Homography를 decompose하여 N행렬의 4가지의 해 후보를 얻습니다. 
-
   int solutions = decomposeHomographyMat(H,InstrincParam,Rs_decomp,Ts_decomp,Normals_decomp);//Homography matrix를 decompose하여 4가지해를 얻습니다. 반환값은 해의개수(=4)입니다.
-  vector<int> good_point_ind_0; //0번해에 대해서 좋은매칭을 가지는 점의 인덱스 배열(벡터)입니다. arg_kp1에서의 인덱스입니다.
-  vector<int> good_point_ind_1;//1번해에 대해서 좋은매칭을 가지는 점의 인덱스 배열(벡터)입니다. arg_kp1에서의 인덱스입니다.
-  vector<int> good_point_ind_2;//2번해에 대해서 좋은매칭을 가지는 점의 인덱스 배열(벡터)입니다. arg_kp1에서의 인덱스입니다.
-  vector<int> good_point_ind_3;//3번해에 대해서 좋은매칭을 가지는 점의 인덱스 배열(벡터)입니다. arg_kp1에서의 인덱스입니다.
-  vector<Point3d> current_good_point_3d_0; //0번해에 대해서 좋은매칭을 가지는 점의 3차원 좌표배열(벡터)입니다. good_point_ind_0에서의 인덱스에 해당하는점에대한 3차원점입니다.
-  vector<Point3d> current_good_point_3d_1;//1번해에 대해서 좋은매칭을 가지는 점의 3차원 좌표배열(벡터)입니다. good_point_ind_1에서의 인덱스에 해당하는점에대한 3차원점입니다.
-  vector<Point3d> current_good_point_3d_2;//2번해에 대해서 좋은매칭을 가지는 점의 3차원 좌표배열(벡터)입니다. good_point_ind_2에서의 인덱스에 해당하는점에대한 3차원점입니다.
-  vector<Point3d> current_good_point_3d_3;//3번해에 대해서 좋은매칭을 가지는 점의 3차원 좌표배열(벡터)입니다. good_point_ind_3에서의 인덱스에 해당하는점에대한 3차원점입니다.
-  thread threads[4];//4가지의 thread로 각 해에 대한 답을 얻습니다. 
-  threads[0] =  thread(CheckRT,0,arg_kp1,arg_kp2,InstrincParam,Rs_decomp[0],Ts_decomp[0], &good_point_ind_0,&current_good_point_3d_0); 
-  threads[1] =  thread(CheckRT,1,arg_kp1,arg_kp2,InstrincParam,Rs_decomp[1],Ts_decomp[1], &good_point_ind_1,&current_good_point_3d_1); 
-  threads[2] =  thread(CheckRT,2,arg_kp1,arg_kp2,InstrincParam,Rs_decomp[2],Ts_decomp[2], &good_point_ind_2,&current_good_point_3d_2); 
-  threads[3] =  thread(CheckRT,3,arg_kp1,arg_kp2,InstrincParam,Rs_decomp[3],Ts_decomp[3], &good_point_ind_3,&current_good_point_3d_3); 
-  int good_points[4] ={0,0,0,0}; //각 해에 대해서 3차원 재투영등의 검사로 좋은 매칭 및 triangulation이 잘된 점들의 갯수를 저장하는 배열입니다.
-  for(int i=0; i<4; i++)
+  vector<vector<int>> good_points_ind(solutions);//0번해에 대해서 좋은매칭을 가지는 점의 인덱스 배열(벡터)입니다. arg_kp1에서의 인덱스입니다.
+  vector<vector<Point3d>> current_good_points_3d(solutions);
+  thread threads[solutions];//4가지의 thread로 각 해에 대한 답을 얻습니다. 
+  for(int i=0; i<solutions; i++)
   {
+    threads[i] =  thread(CheckRT,i,arg_kp1,arg_kp2,InstrincParam,Rs_decomp[i],Ts_decomp[i], &good_points_ind[i],&current_good_points_3d[i]); 
+  }
+  
+  int* good_points = new int(solutions);
+  for(int i =0; i<solutions; i++)
+  {
+    // good_points
     threads[i].join();
   }
-  vector<vector<int>> current_good_points_ind;//좋은매칭을 가지는 점의 인덱스 배열(벡터)를 모두 저장하는 벡터입니다.
-  current_good_points_ind.push_back(good_point_ind_0);
-  current_good_points_ind.push_back(good_point_ind_1);
-  current_good_points_ind.push_back(good_point_ind_2);
-  current_good_points_ind.push_back(good_point_ind_3);
-
-  vector<vector<Point3d>> current_good_points_3d;//좋은매칭을 가지는 점의 3차원 좌표배열(벡터)를 모두 저장하는 벡터입니다.
-  current_good_points_3d.push_back(current_good_point_3d_0);
-  current_good_points_3d.push_back(current_good_point_3d_1);
-  current_good_points_3d.push_back(current_good_point_3d_2);
-  current_good_points_3d.push_back(current_good_point_3d_3);
+  for(int i=0; i<4; i++)
+  {
+    
+  }
   int max_ind =-1;
   int good_point_size =-1;
   //가장 매칭점을 많이 갖는 해를 정답인 해로 결정합니다.
-  for(int j=0; j<4; j++)
+  for(int j=0; j<solutions; j++)
   {
-    if(current_good_points_ind[j].size() - good_point_size>0)
+    if(good_points_ind[j].size() - good_point_size>0)
     {
       max_ind =j;
-      good_point_size= current_good_points_ind[j].size();
+      good_point_size= good_points_ind[j].size();
     }
   }
 
@@ -329,14 +323,14 @@ bool ValidateHomographyRt(vector<Point2f> &arg_kp1, //현재 카메라의 키포
   {//만약에 있다면, R,t, 매칭점인덱스, 3차원 매칭점을 반환합니다.  
     R = Rs_decomp[max_ind];
     t = Ts_decomp[max_ind];
-    good_point_ind = current_good_points_ind[max_ind];
+    good_point_ind = good_points_ind[max_ind];
     current_good_point_3d = current_good_points_3d[max_ind];
   }
   
 }
 
-bool ValidateFundamentalRt(vector<Point2f> &arg_kp1, 
-                        vector<Point2f> &arg_kp2, 
+bool ValidateFundamentalRt(vector<Point2d> &arg_kp1, 
+                        vector<Point2d> &arg_kp2, 
                         Mat InstrincParam,
                         Mat& R, 
                         Mat& t,
@@ -351,14 +345,16 @@ bool ValidateFundamentalRt(vector<Point2f> &arg_kp1,
   // recoverPose(opencv_essential_mat,arg_kp2,arg_kp1,InstrincParam,outputR,outputT,Mask);
   recoverPose(opencv_essential_mat,arg_kp2,arg_kp1,InstrincParam,outputR,outputT);
   thread threads;
+  
   threads =  thread(CheckRT,4,arg_kp1,arg_kp2,InstrincParam,outputR,outputT, &good_point_ind,&current_good_point_3d); 
   threads.join();
+  
   R = outputR;
   t = outputT;
   
 }
 
-void ExtractPoint2D(char* filename, vector<Point2f> &extracted_point2d, int &image_width, int &image_height, float &arg_min_point_x, float& arg_min_point_y)
+void ExtractPoint2D(char* filename, vector<Point2d> &extracted_point2d, int &image_width, int &image_height, float &arg_min_point_x, float& arg_min_point_y)
 {
   extracted_point2d.clear();//기존에 들어있는 점을 지웁니다.
   ifstream poseFile;
@@ -428,6 +424,11 @@ void ExtractPoint3D(char* filename,
       Point3f sample_point = Point3f(p4,p8,p12);//x,y좌표이다.
       extracted_point3d.push_back(sample_point);
     }
+  }
+  else
+  {
+    cout<<"외장하드가 연결이 안된듯합니다."<<endl;
+    exit(0);
   }
 
   float max_point_x = -10000;

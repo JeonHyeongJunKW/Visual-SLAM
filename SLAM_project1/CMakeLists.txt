@@ -18,4 +18,16 @@ add_executable(KeyFrameViewer KeyFrameMakeAndVisualOdometry.cpp
                                 Tracking/Tracking.cpp
                                 LocalMapping/LocalMapping.h
                                 LocalMapping/LocalMapping.cpp)
+add_executable(MapPointMaker KeyFrameMakeAndMapPointMake.cpp
+                                Node/NodeHandler.cpp 
+                                Node/NodeHandler.h 
+                                Node/KeyFrame.h 
+                                Node/KeyFrame.cpp
+                                Node/CameraTool.h
+                                Node/CameraTool.cpp
+                                Tracking/Tracking.h
+                                Tracking/Tracking.cpp
+                                LocalMapping/LocalMapping.h
+                                LocalMapping/LocalMapping.cpp)
 target_link_libraries(KeyFrameViewer ${OpenCV_LIBS} ${DBoW2_LIBS})
+target_link_libraries(MapPointMaker ${OpenCV_LIBS} ${DBoW2_LIBS})

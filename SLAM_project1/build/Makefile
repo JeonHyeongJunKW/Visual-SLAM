@@ -123,6 +123,46 @@ KeyFrameViewer/fast:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/build
 .PHONY : KeyFrameViewer/fast
 
+#=============================================================================
+# Target rules for targets named MapPointMaker
+
+# Build rule for target.
+MapPointMaker: cmake_check_build_system
+	$(MAKE) -f CMakeFiles/Makefile2 MapPointMaker
+.PHONY : MapPointMaker
+
+# fast build rule for target.
+MapPointMaker/fast:
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/build
+.PHONY : MapPointMaker/fast
+
+KeyFrameMakeAndMapPointMake.o: KeyFrameMakeAndMapPointMake.cpp.o
+
+.PHONY : KeyFrameMakeAndMapPointMake.o
+
+# target to build an object file
+KeyFrameMakeAndMapPointMake.cpp.o:
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/KeyFrameMakeAndMapPointMake.cpp.o
+.PHONY : KeyFrameMakeAndMapPointMake.cpp.o
+
+KeyFrameMakeAndMapPointMake.i: KeyFrameMakeAndMapPointMake.cpp.i
+
+.PHONY : KeyFrameMakeAndMapPointMake.i
+
+# target to preprocess a source file
+KeyFrameMakeAndMapPointMake.cpp.i:
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/KeyFrameMakeAndMapPointMake.cpp.i
+.PHONY : KeyFrameMakeAndMapPointMake.cpp.i
+
+KeyFrameMakeAndMapPointMake.s: KeyFrameMakeAndMapPointMake.cpp.s
+
+.PHONY : KeyFrameMakeAndMapPointMake.s
+
+# target to generate assembly for a file
+KeyFrameMakeAndMapPointMake.cpp.s:
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/KeyFrameMakeAndMapPointMake.cpp.s
+.PHONY : KeyFrameMakeAndMapPointMake.cpp.s
+
 KeyFrameMakeAndVisualOdometry.o: KeyFrameMakeAndVisualOdometry.cpp.o
 
 .PHONY : KeyFrameMakeAndVisualOdometry.o
@@ -157,6 +197,7 @@ LocalMapping/LocalMapping.o: LocalMapping/LocalMapping.cpp.o
 # target to build an object file
 LocalMapping/LocalMapping.cpp.o:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.o
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/LocalMapping/LocalMapping.cpp.o
 .PHONY : LocalMapping/LocalMapping.cpp.o
 
 LocalMapping/LocalMapping.i: LocalMapping/LocalMapping.cpp.i
@@ -166,6 +207,7 @@ LocalMapping/LocalMapping.i: LocalMapping/LocalMapping.cpp.i
 # target to preprocess a source file
 LocalMapping/LocalMapping.cpp.i:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.i
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/LocalMapping/LocalMapping.cpp.i
 .PHONY : LocalMapping/LocalMapping.cpp.i
 
 LocalMapping/LocalMapping.s: LocalMapping/LocalMapping.cpp.s
@@ -175,6 +217,7 @@ LocalMapping/LocalMapping.s: LocalMapping/LocalMapping.cpp.s
 # target to generate assembly for a file
 LocalMapping/LocalMapping.cpp.s:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/LocalMapping/LocalMapping.cpp.s
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/LocalMapping/LocalMapping.cpp.s
 .PHONY : LocalMapping/LocalMapping.cpp.s
 
 Node/CameraTool.o: Node/CameraTool.cpp.o
@@ -184,6 +227,7 @@ Node/CameraTool.o: Node/CameraTool.cpp.o
 # target to build an object file
 Node/CameraTool.cpp.o:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.o
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/Node/CameraTool.cpp.o
 .PHONY : Node/CameraTool.cpp.o
 
 Node/CameraTool.i: Node/CameraTool.cpp.i
@@ -193,6 +237,7 @@ Node/CameraTool.i: Node/CameraTool.cpp.i
 # target to preprocess a source file
 Node/CameraTool.cpp.i:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.i
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/Node/CameraTool.cpp.i
 .PHONY : Node/CameraTool.cpp.i
 
 Node/CameraTool.s: Node/CameraTool.cpp.s
@@ -202,6 +247,7 @@ Node/CameraTool.s: Node/CameraTool.cpp.s
 # target to generate assembly for a file
 Node/CameraTool.cpp.s:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Node/CameraTool.cpp.s
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/Node/CameraTool.cpp.s
 .PHONY : Node/CameraTool.cpp.s
 
 Node/KeyFrame.o: Node/KeyFrame.cpp.o
@@ -211,6 +257,7 @@ Node/KeyFrame.o: Node/KeyFrame.cpp.o
 # target to build an object file
 Node/KeyFrame.cpp.o:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Node/KeyFrame.cpp.o
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/Node/KeyFrame.cpp.o
 .PHONY : Node/KeyFrame.cpp.o
 
 Node/KeyFrame.i: Node/KeyFrame.cpp.i
@@ -220,6 +267,7 @@ Node/KeyFrame.i: Node/KeyFrame.cpp.i
 # target to preprocess a source file
 Node/KeyFrame.cpp.i:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Node/KeyFrame.cpp.i
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/Node/KeyFrame.cpp.i
 .PHONY : Node/KeyFrame.cpp.i
 
 Node/KeyFrame.s: Node/KeyFrame.cpp.s
@@ -229,6 +277,7 @@ Node/KeyFrame.s: Node/KeyFrame.cpp.s
 # target to generate assembly for a file
 Node/KeyFrame.cpp.s:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Node/KeyFrame.cpp.s
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/Node/KeyFrame.cpp.s
 .PHONY : Node/KeyFrame.cpp.s
 
 Node/NodeHandler.o: Node/NodeHandler.cpp.o
@@ -238,6 +287,7 @@ Node/NodeHandler.o: Node/NodeHandler.cpp.o
 # target to build an object file
 Node/NodeHandler.cpp.o:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Node/NodeHandler.cpp.o
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/Node/NodeHandler.cpp.o
 .PHONY : Node/NodeHandler.cpp.o
 
 Node/NodeHandler.i: Node/NodeHandler.cpp.i
@@ -247,6 +297,7 @@ Node/NodeHandler.i: Node/NodeHandler.cpp.i
 # target to preprocess a source file
 Node/NodeHandler.cpp.i:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Node/NodeHandler.cpp.i
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/Node/NodeHandler.cpp.i
 .PHONY : Node/NodeHandler.cpp.i
 
 Node/NodeHandler.s: Node/NodeHandler.cpp.s
@@ -256,6 +307,7 @@ Node/NodeHandler.s: Node/NodeHandler.cpp.s
 # target to generate assembly for a file
 Node/NodeHandler.cpp.s:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Node/NodeHandler.cpp.s
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/Node/NodeHandler.cpp.s
 .PHONY : Node/NodeHandler.cpp.s
 
 Tracking/Tracking.o: Tracking/Tracking.cpp.o
@@ -265,6 +317,7 @@ Tracking/Tracking.o: Tracking/Tracking.cpp.o
 # target to build an object file
 Tracking/Tracking.cpp.o:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.o
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/Tracking/Tracking.cpp.o
 .PHONY : Tracking/Tracking.cpp.o
 
 Tracking/Tracking.i: Tracking/Tracking.cpp.i
@@ -274,6 +327,7 @@ Tracking/Tracking.i: Tracking/Tracking.cpp.i
 # target to preprocess a source file
 Tracking/Tracking.cpp.i:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.i
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/Tracking/Tracking.cpp.i
 .PHONY : Tracking/Tracking.cpp.i
 
 Tracking/Tracking.s: Tracking/Tracking.cpp.s
@@ -283,6 +337,7 @@ Tracking/Tracking.s: Tracking/Tracking.cpp.s
 # target to generate assembly for a file
 Tracking/Tracking.cpp.s:
 	$(MAKE) -f CMakeFiles/KeyFrameViewer.dir/build.make CMakeFiles/KeyFrameViewer.dir/Tracking/Tracking.cpp.s
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/Tracking/Tracking.cpp.s
 .PHONY : Tracking/Tracking.cpp.s
 
 # Help Target
@@ -292,8 +347,12 @@ help:
 	@echo "... clean"
 	@echo "... depend"
 	@echo "... rebuild_cache"
-	@echo "... KeyFrameViewer"
 	@echo "... edit_cache"
+	@echo "... KeyFrameViewer"
+	@echo "... MapPointMaker"
+	@echo "... KeyFrameMakeAndMapPointMake.o"
+	@echo "... KeyFrameMakeAndMapPointMake.i"
+	@echo "... KeyFrameMakeAndMapPointMake.s"
 	@echo "... KeyFrameMakeAndVisualOdometry.o"
 	@echo "... KeyFrameMakeAndVisualOdometry.i"
 	@echo "... KeyFrameMakeAndVisualOdometry.s"

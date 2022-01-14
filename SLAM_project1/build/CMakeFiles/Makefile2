@@ -97,6 +97,43 @@ clean: CMakeFiles/KeyFrameViewer.dir/clean
 .PHONY : clean
 
 #=============================================================================
+# Target rules for target CMakeFiles/MapPointMaker.dir
+
+# All Build rule for target.
+CMakeFiles/MapPointMaker.dir/all:
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/depend
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/build
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --progress-dir=/home/jeon/visual_slam/Visual-SLAM/SLAM_project1/build/CMakeFiles --progress-num=8,9,10,11,12,13,14 "Built target MapPointMaker"
+.PHONY : CMakeFiles/MapPointMaker.dir/all
+
+# Include target in all.
+all: CMakeFiles/MapPointMaker.dir/all
+
+.PHONY : all
+
+# Build rule for subdir invocation for target.
+CMakeFiles/MapPointMaker.dir/rule: cmake_check_build_system
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/build/CMakeFiles 7
+	$(MAKE) -f CMakeFiles/Makefile2 CMakeFiles/MapPointMaker.dir/all
+	$(CMAKE_COMMAND) -E cmake_progress_start /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/build/CMakeFiles 0
+.PHONY : CMakeFiles/MapPointMaker.dir/rule
+
+# Convenience name for target.
+MapPointMaker: CMakeFiles/MapPointMaker.dir/rule
+
+.PHONY : MapPointMaker
+
+# clean rule for target.
+CMakeFiles/MapPointMaker.dir/clean:
+	$(MAKE) -f CMakeFiles/MapPointMaker.dir/build.make CMakeFiles/MapPointMaker.dir/clean
+.PHONY : CMakeFiles/MapPointMaker.dir/clean
+
+# clean rule for target.
+clean: CMakeFiles/MapPointMaker.dir/clean
+
+.PHONY : clean
+
+#=============================================================================
 # Special targets to cleanup operation of make.
 
 # Special rule to run CMake to check the build system integrity.

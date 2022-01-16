@@ -27,7 +27,7 @@ class MapPoint
                       //view count가 3보다 작다면 이 맵포인트는 지워집니다 . 
     int max_d; //해당 점이 보여질 수 있는 최대거리
     int min_d; //해당 점이 보여질 수 있는 최소거리
-    int scale; //해당점에 대한 scale
+    map<int,int> octave_match;//각 키프레임에서 보이는 옥타브정보 
     int int_Node = 0;//노드의 이름 
 };
 
@@ -38,7 +38,7 @@ class KeyFrame
     Mat _mat_Intrinsicparam;//내개 파라미터 
     Mat _mat_Originimage;//원본 이미지입니다. (내개 파라미터 미적용)
     map<int, MapPoint*> _pmappoint_OwnedMapPoint;//해당 키프레임이 가지고 있는 맵포인트들의 집합입니다. 포인터로 관리합니다. 
-
+    map<int, int> _map_keyIdx2MapPointIdx;//키포인트의 인덱스에 대해서 맵포인트상의 인덱스로 변환합니다. 키값이 존재하지않으면 새로배정합니다.
     KeyFrame* _pkeyframe_Fatherkeyframe;//이 키프레임의 이전 키프레임의 포인터입니다. 키프레임간에 유사도 검사등에 사용됩니다.
     KeyFrame* _pkeyframe_Childkeyframe;//이 키프레임의 다음 키프레임의 포인터입니다. 키프레임간에 유사도 검사등에 사용됩니다.
     double* _pf_camera_R_t;//12개의 파라미터이다.[R | T]가 행단위로 들어가 있다. 추가로 마지막 성분으로 스케일이 들어간다.

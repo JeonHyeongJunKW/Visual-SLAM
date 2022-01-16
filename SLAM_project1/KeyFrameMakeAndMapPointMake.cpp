@@ -5,6 +5,7 @@
 #include "Node/CameraTool.h"
 #include "Tracking/Tracking.h"
 #include "LocalMapping/LocalMapping.h"
+
 #include <thread>
 #include <mutex>
 using namespace cv;

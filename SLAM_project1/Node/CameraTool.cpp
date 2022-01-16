@@ -112,6 +112,7 @@ void CheckRT(int solution_idx,
   //parallax 변수 : 각 카메라별 좌표 
   Mat PastPt = Mat::zeros(3,1, CV_64F);
   Mat CurrentPt = -R.t()*t;//과거 점 기준
+  
   for(int point_ind=0; point_ind<points.size(); point_ind++)
   {
     Point3d point3d1 = points[point_ind];//3차원점입니다. 과거기준 좌표입니다. 
@@ -119,9 +120,10 @@ void CheckRT(int solution_idx,
     Mat estimated_point2 = R*(Mat(point3d1)+t);//현재 기준 좌표
 
     Mat PastNormal = point_pose_in_past - PastPt;
-    Mat CurrentNormal =point_pose_in_past - estimated_point2;
+    Mat CurrentNormal = estimated_point2 - CurrentPt;
     float past_dist = norm(PastNormal);
     float current_dist = norm(CurrentNormal);
+
     float cosParallax = PastNormal.dot(CurrentNormal)/(past_dist*current_dist);
     if(cosParallax> 0.9999)
     {

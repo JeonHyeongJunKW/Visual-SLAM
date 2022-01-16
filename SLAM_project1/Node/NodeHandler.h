@@ -29,13 +29,15 @@ class NewKeyFrameSet
   public:
     KeyFrame* CurrentFrame; //래퍼런스와의 매칭간에 현재 프레임의 포인터입니다.
     KeyFrame* ReferenceFrame;//래퍼런스와의 매칭간에 래퍼런스 프레임의 포인터입니다.
-    vector<Point2d> CurrentGoodPoint2D;//래퍼런스와의 매칭간에 좋은 매칭을 가지는 현재 2d점입니다.
-    vector<Point2d> ReferenceGoodPoint2D;//래퍼런스와의 매칭간에 좋은 매칭을 가지는 레퍼런스 2d점입니다.
+    vector<KeyPoint> CurrentGoodPoint2D;//래퍼런스와의 매칭간에 좋은 매칭을 가지는 현재 2d점입니다.
+    vector<KeyPoint> ReferenceGoodPoint2D;//래퍼런스와의 매칭간에 좋은 매칭을 가지는 레퍼런스 2d점입니다.
 
     vector<Point3d> CurrentGoodPoint3D;//래퍼런스와의 매칭간에 좋은 매칭을 가지는 현재 3d점입니다.
     Mat descriptor;
     Mat R;//래퍼런스와의 매칭간에 좋은 매칭을 가지는 R입니다.
     Mat t;//래퍼런스와의 매칭간에 좋은 매칭을 가지는 t입니다.
+    vector<int> RefKeyIdx;
+    vector<int> CurKeyIdx;
 };
 
 class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다. 
@@ -48,6 +50,9 @@ class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다.
     vector<MapPoint*> _pt_LocalWindowMapPoints;//윈도우 단위로 MapPoint를 유지합니다. 키프레임이 일정이상 생기면 일정단위로 삭제합니다. 
     vector<NewKeyFrameSet*> v_newKeyFrame;
     Ptr<DescriptorMatcher> _match_OrbMatchHandle = BFMatcher::create(NORM_HAMMING);
+    double* octave2sigma;
+    double scalefactor;
+    int pyramid_size;
     Mat _mat_FullDescriptor;//전체 descriptor입니다. 
     Mat _mat_LocalDescriptor; //윈도우 단위로 descriptor를 유지합니다.
     

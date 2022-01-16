@@ -40,7 +40,6 @@ void tracking_thread(NodeHandler& nodehandler)
           Mat Initial_R;
           Mat Initial_T;
           NewKeyFrameSet* Reference_matches = new NewKeyFrameSet();//마지막점과의 매칭 관계를 저장한다.
-          cout<<"현재 프레임 이름 : "<<kfp_TempFrame->Get_KeyIndex()<<" 나중 프레임 이름 : " <<kfp_LastFrame->Get_KeyIndex()<<endl;
           bool haveGoodMatch = GetInitialRt(nodehandler,
                       kfp_TempFrame,
                       kfp_LastFrame,
@@ -100,10 +99,12 @@ bool GetInitialRt(NodeHandler &nodehandler, //노드(키프레임, 맵포인트)
     vector<DMatch> good_matches;//좋은 매치만 저장됩니다.
     // sort(matches.begin(),matches.end());
     const float ratio_thresh = 0.75f;
+    vector<int> good_match_idx;
     for (size_t i = 0; i < matches.size(); i++){
       if (matches[i][0].distance < ratio_thresh * matches[i][1].distance)//query -> first
       {
         good_matches.push_back(matches[i][0]);
+        good_match_idx.push_back(i);
       }
     }
     if(good_matches.size()<15)//현재 로컬프레임과의 매칭이 잘되었는지 확인합니다. 
@@ -192,30 +193,32 @@ bool GetInitialRt(NodeHandler &nodehandler, //노드(키프레임, 맵포인트)
     Cu_Re_Matches->CurrentFrame = kfp_NewFrame;
     Cu_Re_Matches->ReferenceFrame = kfp_LastFrame;
     Cu_Re_Matches->CurrentGoodPoint3D = current_good_point_3d;
-    // if(kfp_NewFrame->Get_KeyIndex() ==124)
-    // {
-      
-    // }
     
-    vector<Point2d> CurretGoodPoint2D;
-    vector<Point2d> ReferenceGoodPoint2D;
-    // vector<Mat> descriptor;
+    vector<KeyPoint> CurretGoodPoint2D;
+    vector<KeyPoint> ReferenceGoodPoint2D;
     Mat all_descriptor =kfp_NewFrame->Get_Descriptor();
+    vector<KeyPoint> newKeyPoint = kfp_NewFrame->Get_keyPoint();
+    vector<KeyPoint> lastKeyPoint = lastFrame->Get_keyPoint();
     Mat good_descriptor =Mat(final_good_point_ind.size(),all_descriptor.cols,all_descriptor.type());
-
-    for(int i=0; i<final_good_point_ind.size(); i++)
+    vector<int> newKeyIdx;
+    vector<int> oldKeyIdx;
+    for(int i=0; i<final_good_point_ind.size(); i++)//good match point 점에서도, 
     {
-      int good_match_ind = inlier_set[final_good_point_ind[i]];
-      CurretGoodPoint2D.push_back(current_point[good_match_ind]);
-      ReferenceGoodPoint2D.push_back(last_point[good_match_ind]);
+      DMatch good_match_temp = good_matches[inlier_set[final_good_point_ind[i]]];
+      CurretGoodPoint2D.push_back(newKeyPoint[good_match_temp.queryIdx]);
+      ReferenceGoodPoint2D.push_back(lastKeyPoint[good_match_temp.trainIdx]);
       // descriptor.push_back(all_descriptor(Rect(0,good_match_ind,32,1)));
-      all_descriptor(Rect(0,good_match_ind,32,1)).copyTo(good_descriptor(Rect(0,i,32,1)));
+      all_descriptor(Rect(0,good_match_temp.queryIdx,32,1)).copyTo(good_descriptor(Rect(0,i,32,1)));
+      newKeyIdx.push_back(good_match_temp.queryIdx);
+      oldKeyIdx.push_back(good_match_temp.trainIdx);
     }
     Cu_Re_Matches->CurrentGoodPoint2D = CurretGoodPoint2D;
     Cu_Re_Matches->ReferenceGoodPoint2D = ReferenceGoodPoint2D;
     Cu_Re_Matches->descriptor = good_descriptor;
     Cu_Re_Matches->R =R;
     Cu_Re_Matches->t =t;
+    Cu_Re_Matches->RefKeyIdx = oldKeyIdx;
+    Cu_Re_Matches->CurKeyIdx = newKeyIdx;
     
     return true;
 }

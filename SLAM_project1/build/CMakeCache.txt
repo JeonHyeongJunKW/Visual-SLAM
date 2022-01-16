@@ -199,6 +199,9 @@ KeyFrameViewer_SOURCE_DIR:STATIC=/home/jeon/visual_slam/Visual-SLAM/SLAM_project
 //The directory containing a CMake configuration file for OpenCV.
 OpenCV_DIR:PATH=/usr/share/OpenCV
 
+//The directory containing a CMake configuration file for Python2.
+Python2_DIR:PATH=Python2_DIR-NOTFOUND
+
 
 ########################
 # INTERNAL cache entries

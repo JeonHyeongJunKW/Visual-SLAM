@@ -333,8 +333,7 @@ void NodeHandler::Match_MapPoint(NewKeyFrameSet *Cu_Re_Matches, Mat camera_globa
 
         matched_point++;
         int old_keyIdx = good_matches[point_ind].trainIdx;
-        bool Is_new_point = (candidate_connected_frame->_map_keyIdx2MapPointIdx.find(old_keyIdx) == candidate_connected_frame->_map_keyIdx2MapPointIdx.end());
-        // cout<<"맵포인트 이웃삽입전"<<endl; 
+        bool Is_new_point = (candidate_connected_frame->_map_keyIdx2MapPointIdx.find(old_keyIdx) == candidate_connected_frame->_map_keyIdx2MapPointIdx.end()); 
         if(Is_new_point)
         {
           MapPoint* new_mapPoint =new MapPoint();

@@ -28,6 +28,7 @@ class MapPoint
     int max_d; //해당 점이 보여질 수 있는 최대거리
     int min_d; //해당 점이 보여질 수 있는 최소거리
     map<int,int> octave_match;//각 키프레임에서 보이는 옥타브정보 
+    map<int,int> keypoint_match;//각 키프레임에서 보이는 키포인트 인덱스 정보
     int int_Node = 0;//노드의 이름 
 };
 

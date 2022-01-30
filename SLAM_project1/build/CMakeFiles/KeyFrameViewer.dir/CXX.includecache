@@ -91,6 +91,8 @@ CameraTool.h
 /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/Node/CameraTool.h
 thread
 -
+algorithm
+-
 
 /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/Node/NodeHandler.h
 KeyFrame.h
@@ -114,6 +116,8 @@ opencv2/opencv.hpp
 ../Node/CameraTool.h
 /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/Node/CameraTool.h
 thread
+-
+algorithm
 -
 
 /home/jeon/visual_slam/Visual-SLAM/SLAM_project1/Tracking/Tracking.h

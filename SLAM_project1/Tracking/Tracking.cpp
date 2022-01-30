@@ -4,6 +4,7 @@
 #include "../Node/NodeHandler.h"
 #include "../Node/CameraTool.h"
 #include <thread>
+#include <algorithm>
 using namespace std;
 using namespace cv;
 
@@ -100,11 +101,19 @@ bool GetInitialRt(NodeHandler &nodehandler, //노드(키프레임, 맵포인트)
     // sort(matches.begin(),matches.end());
     const float ratio_thresh = 0.75f;
     vector<int> good_match_idx;
+    vector<int> already_match_list;
     for (size_t i = 0; i < matches.size(); i++){
       if (matches[i][0].distance < ratio_thresh * matches[i][1].distance)//query -> first
       {
-        good_matches.push_back(matches[i][0]);
-        good_match_idx.push_back(i);
+        int match_ind =matches[i][0].trainIdx;
+        auto match_it = find(already_match_list.begin(),already_match_list.end(),match_ind);
+        if(match_it == already_match_list.end())//이미 매칭이 되버린점이 없는경우
+        {
+          good_matches.push_back(matches[i][0]);
+          good_match_idx.push_back(i);
+          already_match_list.push_back(match_ind);
+        }
+        
       }
     }
     if(good_matches.size()<15)//현재 로컬프레임과의 매칭이 잘되었는지 확인합니다. 
@@ -112,7 +121,7 @@ bool GetInitialRt(NodeHandler &nodehandler, //노드(키프레임, 맵포인트)
       cout<<"relocalization start"<<endl;
       exit(0);
     }
-    cout<<"기본 매칭 사이즈 : "<<good_matches.size()<<endl;
+    // cout<<"기본 매칭 사이즈 : "<<good_matches.size()<<endl;
     vector<Point2d> current_point;
     vector<Point2d> last_point;
     
@@ -182,10 +191,10 @@ bool GetInitialRt(NodeHandler &nodehandler, //노드(키프레임, 맵포인트)
                           final_good_point_ind,
                           current_good_point_3d);
     }
-    cout<<"초기 R,t 구할때의 매칭 사이즈 : "<<current_good_point_3d.size()<<endl;
+    // cout<<"초기 R,t 구할때의 매칭 사이즈 : "<<current_good_point_3d.size()<<endl;
     if(current_good_point_3d.size() ==0)
     {
-      cout<<"매칭이 안되는 상황발생 일단 통과"<<endl;
+      cout<<"바로전 프레임과 매칭이 안되는 상황발생 일단 통과"<<endl;
       return false;
     }
     R= return_R;

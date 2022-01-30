@@ -45,7 +45,7 @@ class NodeHandler//맵포인트를 전반적으로 관리, 평가합니다.
   public://variable
     //비교하는 부분을 윈도우를 만들어서 그걸로 비교하자.
     vector<MapPoint*> _pt_MapPoints;//전체 맵포인트가 들어있습니다.
-    vector<KeyFrame*> _pt_KeyFrames;//전체 키프레임이 담겨있습니다. 
+    map<int, KeyFrame*> _pt_KeyFrames;//전체 키프레임이 담겨있습니다. 
     vector<KeyFrame*> _pt_LocalWindowKeyFrames;//윈도우 단위로 키 프레임이 담겨있습니다. 키프레임이 일정이상 생기면 일정단위로 삭제합니다. 
     vector<MapPoint*> _pt_LocalWindowMapPoints;//윈도우 단위로 MapPoint를 유지합니다. 키프레임이 일정이상 생기면 일정단위로 삭제합니다. 
     vector<NewKeyFrameSet*> v_newKeyFrame;

@@ -60,6 +60,7 @@
 
   - LocalMapping/LocalMapping.cpp
     - 키프레임 등록 및 odometry업데이트까지됨
+    - 맵포인트 등록 및 불완전한 맵포인트 선별 및 제거코드 구현
   
 ### KeyFrame이 가진 정보 [형준]
 - 카메라 포즈 및 내부 파라미터
@@ -88,3 +89,6 @@
 ## step 6 : loop closing 인지/ DBOW 유지및 관리 [형준], loop closing 수행(Essential graph 최적화)[찬혁]
 
 # 1차 목표기간 :  6주
+
+## Update 내역 
+21/01/30 - 맵포인트 추출 및 제거 알고리즘 구현, 추후에 최적화 진행예정, 키프레임 결정 알고리즘 보완예정

@@ -4,6 +4,7 @@
 #include <math.h>
 #include "CameraTool.h"
 #include <thread>
+#include <algorithm>
 
 using namespace std;
 using namespace cv;
@@ -70,7 +71,7 @@ bool NodeHandler::AddNewKeyFrame(KeyFrame* p_NewFrame)
     exit(0);
   }
   this->_pt_LocalWindowKeyFrames.push_back(p_NewFrame);//로컬 키프레임에 등록 
-  this->_pt_KeyFrames.push_back(p_NewFrame);//전역 키프레임에 등록
+  _pt_KeyFrames[p_NewFrame->Get_KeyIndex()] = p_NewFrame;
   return true;
 }
 bool NodeHandler::SetImageFeature(KeyFrame* p_NewFrame, Mat Image)
@@ -79,12 +80,6 @@ bool NodeHandler::SetImageFeature(KeyFrame* p_NewFrame, Mat Image)
   Mat des;
   int kp_size = this->_Get_NumberOfOrbFeature(Image,des,kp_vector);//현재 프레임에 대한 feature들을 얻어온다.
 
-  //부모키프레임을 등록합니다.
-  if(!this->_pt_KeyFrames.empty())//부모키프레임이 존재할 수 있다면(이미 하나정도 저장되어있다면)
-  {
-    p_NewFrame->Set_FatherKeyFrame(*(_pt_KeyFrames.end()-1));
-    (*(_pt_KeyFrames.end()-1))->Set_ChildKeyFrame(p_NewFrame);
-  }
   int int_DescriptorSize = 32;
   p_NewFrame->Set_Descriptor(des);//디스크립터 등록합니다.
   p_NewFrame->Set_KeyPoint(kp_vector);//키포인터 등록합니다. 
@@ -114,6 +109,8 @@ void NodeHandler::Match_MapPoint(NewKeyFrameSet *Cu_Re_Matches, Mat camera_globa
   KeyFrame* currentframe = Cu_Re_Matches->CurrentFrame;
   vector<KeyFrame*> local_keyframe = this->_pt_LocalWindowKeyFrames;
   vector<KeyFrame*> temp_local_keyframe;
+  this->_pt_KeyFrames[currentframe->Get_KeyIndex()] = currentframe;
+  // cout<<currentframe->Get_KeyIndex()<<"의 로컬맵만들기"<<endl;
   if(local_keyframe.size() ==1 && Cu_Re_Matches->ReferenceFrame->Get_KeyIndex() ==0)
   {//만약에 로컬단위로 유지하던 키프레임의 수가 0이라면 그냥 처음 레피런스 프레임이랑 유지하던 맵포인트를 넣습니다.  
     Mat current_descriptors = Cu_Re_Matches->descriptor;//현재 프레임에 대한 descriptor들
@@ -121,8 +118,9 @@ void NodeHandler::Match_MapPoint(NewKeyFrameSet *Cu_Re_Matches, Mat camera_globa
     {//맵포인트 생성 및 새로운 맵포인트를 만듭니다. 
       MapPoint* new_mapPoint =new MapPoint();
       new_mapPoint->int_Node = _int_MapPointIdx;//새로운 맵포인트에 인덱스를 부여합니다. 
-      new_mapPoint->make_count = 0;
-      new_mapPoint->view_count = 2;
+      
+      new_mapPoint->make_count = currentframe->Get_KeyIndex();
+      new_mapPoint->view_count = 0;
       current_descriptors(Rect(0,j,32,1)).copyTo(new_mapPoint->mat_Orbdescriptor);//기존 레퍼런스 프레임과 사용하던 맵포인트를 등록합니다. 
       new_mapPoint->max_d = 10;//애매하다.
       new_mapPoint->min_d = 1;//애매하다.
@@ -153,6 +151,8 @@ void NodeHandler::Match_MapPoint(NewKeyFrameSet *Cu_Re_Matches, Mat camera_globa
       Cu_Re_Matches->ReferenceFrame->Add_MapPoint(new_mapPoint);//래퍼런스 프레임에 맵포인트를 추가합니다.
       int cu_idx = Cu_Re_Matches->CurKeyIdx[j];
       int re_idx = Cu_Re_Matches->RefKeyIdx[j];
+      new_mapPoint->keypoint_match[Cu_Re_Matches->CurrentFrame->Get_KeyIndex()] = cu_idx;
+      new_mapPoint->keypoint_match[Cu_Re_Matches->ReferenceFrame->Get_KeyIndex()] = re_idx;
       Cu_Re_Matches->CurrentFrame->_map_keyIdx2MapPointIdx[cu_idx] = _int_MapPointIdx;
       Cu_Re_Matches->ReferenceFrame->_map_keyIdx2MapPointIdx[re_idx] = _int_MapPointIdx;
       _int_MapPointIdx++;
@@ -165,7 +165,6 @@ void NodeHandler::Match_MapPoint(NewKeyFrameSet *Cu_Re_Matches, Mat camera_globa
   {//현재 로컬프레임이랑 매칭을 합니다. 
     for(int i =0; i<this->_pt_LocalWindowKeyFrames.size(); i++)
     {//하나씩 비교합니다.
-      
       KeyFrame* candidate_connected_frame = _pt_LocalWindowKeyFrames[i];//로컬프레임의 i번째 프레임을 얻어옵니다.
       vector<vector<DMatch>> matches;//매치를 저장할 변수입니다.
       _match_OrbMatchHandle->knnMatch(currentframe->Get_Descriptor(),
@@ -175,11 +174,19 @@ void NodeHandler::Match_MapPoint(NewKeyFrameSet *Cu_Re_Matches, Mat camera_globa
                                               //찾습니다.
       const float ratio_thresh = 0.65f;//비교 임계값
       vector<DMatch> good_matches;
+      vector<int> already_match_list;
       for (size_t match_ind = 0; match_ind< matches.size(); match_ind++)
       {
         if (matches[match_ind][0].distance < ratio_thresh * matches[match_ind][1].distance)
         {
-          good_matches.push_back(matches[match_ind][0]);//매칭이 잘된 경우
+          int test_train_idx =matches[match_ind][0].trainIdx;
+          auto match_it = find(already_match_list.begin(),already_match_list.end(),test_train_idx);
+          if(match_it == already_match_list.end())//이미 매칭이 되버린점이 없는경우
+          {
+            good_matches.push_back(matches[match_ind][0]);//매칭이 잘된 경우
+            already_match_list.push_back(test_train_idx);
+          }
+          
         }
       }
       
@@ -211,7 +218,6 @@ void NodeHandler::Match_MapPoint(NewKeyFrameSet *Cu_Re_Matches, Mat camera_globa
         int cand_Idx = good_matches[match_ind].trainIdx;
         KeyPoint cand_keypoint = cand_keypoints[cand_Idx];
         Point2f cand_point_2f = cand_keypoint.pt;
-
         current_point.push_back(Point2d(double(cur_point_2f.x),double(cur_point_2f.y)));//현재프레임
         candidate_point.push_back(Point2d(double(cand_point_2f.x),double(cand_point_2f.y)));//나중프레임
       }
@@ -272,10 +278,6 @@ void NodeHandler::Match_MapPoint(NewKeyFrameSet *Cu_Re_Matches, Mat camera_globa
         int past_octave =cand_keypoints[good_matches[point_ind].trainIdx].octave;//과거 프레임에서 본 옥타브 정보입니다. 
         // cout<<good_matches[point_ind].queryIdx<<", "<<cur_keypoints.size()<<endl;
         int current_octave =cur_keypoints[good_matches[point_ind].queryIdx].octave;//현재 프레임에서 본 옥타브 정보입니다.
-        // cout<<past_octave<<endl;
-        // cout<<current_octave<<endl;
-        // cout<<octave2sigma[past_octave]<<endl;
-        // cout<<octave2sigma[past_octave]<<endl;
         double past_sigma = octave2sigma[past_octave];
         double current_sigma = octave2sigma[current_octave];
         // cout<<"after octave"<<endl;
@@ -322,11 +324,6 @@ void NodeHandler::Match_MapPoint(NewKeyFrameSet *Cu_Re_Matches, Mat camera_globa
         double ratioDist = current_dist/(past_dist+0.0000000000000001);
         
         double ratioOctave =  (double)current_sigma/past_sigma;
-        // cout<<"current sigma : "<<current_sigma<<endl;
-        // cout<<"past sigma : "<<past_sigma<<endl;
-        // cout<<"옥타브 차이 : "<<ratioOctave<<endl;
-        // cout<<"거리차이(스케일 펙터가 곱해짐) : "<<ratioDist*scalefactor<<endl;
-        // exit(0);
         double ratioFactor = 1.5f*scalefactor;//sigma값과 3d점 사이의 거리를 비교할 때, 어느정도 차이를 인정해줄지 고른다.(스케일 factor에 비례한다.)
         if(ratioDist*scalefactor<ratioOctave || ratioDist>ratioOctave*ratioFactor)
         {//옥타브에 대해서 거리값이 널널한 조건을 만족하면된다.1.8배이상 차이나면 안된다.
@@ -335,64 +332,83 @@ void NodeHandler::Match_MapPoint(NewKeyFrameSet *Cu_Re_Matches, Mat camera_globa
 
 
         matched_point++;
-        //스케일 에러도 찾아야하는데 귀찮다.. 미루자.
-        //이미 레퍼런스 프레임에서 유지하고 있는 맵포인트 정보도 얻는다. 픽셀이랑 3차원좌표등에서 매우 유사한 점을 찾는다. 
-        //해당 맵포인트를 업데이트하거나 새로만든다. (맵포인트에서 이미 해당 프레임을 유지하고 있는 지를 확인해서 등록한다.)
         int old_keyIdx = good_matches[point_ind].trainIdx;
         bool Is_new_point = (candidate_connected_frame->_map_keyIdx2MapPointIdx.find(old_keyIdx) == candidate_connected_frame->_map_keyIdx2MapPointIdx.end());
-        int min_range =10000;
-        int min_index = 0;
         // cout<<"맵포인트 이웃삽입전"<<endl; 
-        auto p_candidate_mappoint = candidate_map_point.begin();
-
         if(Is_new_point)
         {
           MapPoint* new_mapPoint =new MapPoint();
-          new_mapPoint->int_Node = _int_MapPointIdx;//새로운 맵포인트에 인덱스를 부여합니다. 
+          new_mapPoint->int_Node = this->_int_MapPointIdx;//새로운 맵포인트에 인덱스를 부여합니다. 
           
-          new_mapPoint->make_count = 0;
-          new_mapPoint->view_count = 2;
+          new_mapPoint->make_count = currentframe->Get_KeyIndex();
+          new_mapPoint->view_count = 0;
           (currentframe->Get_Descriptor())(Rect(0,good_matches[point_ind].queryIdx,32,1)).copyTo(new_mapPoint->mat_Orbdescriptor);//기존 레퍼런스 프레임과 사용하던 맵포인트를 등록합니다. 
           new_mapPoint->max_d = 10;//애매하다.
           new_mapPoint->min_d = 1;//애매하다.
-          // Mat local_point3f(Cu_Re_Matches->CurrentGoodPoint3D[j]);
           
           Mat local_point3f = (Mat_<double>(4,1)<<point3d2.x,
                                               point3d2.y,
                                               point3d2.z,
                                               1);
+
           Mat global_point3f = camera_global_point*local_point3f;//점에 대한 변환으로 바꿔서 global 좌표로 구합니다. 
           global_point3f /= global_point3f.at<double>(3,0);
           new_mapPoint->p3d_coordinate = Point3f(global_point3f.at<double>(0,0),
                                           global_point3f.at<double>(1,0),
                                           global_point3f.at<double>(2,0));//글로벌 3차원좌표로 바꿔서 저장합니다. //good_matches[point_ind].queryIdx
                                                                                                                 //good_matches[point_ind].trainIdx
-          new_mapPoint->pixel_match[Cu_Re_Matches->CurrentFrame->Get_KeyIndex()] = currentframe->Get_keyPoint()[good_matches[point_ind].queryIdx].pt;
-          new_mapPoint->pixel_match[Cu_Re_Matches->ReferenceFrame->Get_KeyIndex()] = candidate_connected_frame->Get_keyPoint()[good_matches[point_ind].trainIdx].pt;
-          new_mapPoint->octave_match[Cu_Re_Matches->CurrentFrame->Get_KeyIndex()] = currentframe->Get_keyPoint()[good_matches[point_ind].queryIdx].octave;
-          new_mapPoint->octave_match[Cu_Re_Matches->ReferenceFrame->Get_KeyIndex()] = candidate_connected_frame->Get_keyPoint()[good_matches[point_ind].trainIdx].octave;
+          new_mapPoint->pixel_match[currentframe->Get_KeyIndex()] = currentframe->Get_keyPoint()[good_matches[point_ind].queryIdx].pt;
+          new_mapPoint->pixel_match[candidate_connected_frame->Get_KeyIndex()] = candidate_connected_frame->Get_keyPoint()[good_matches[point_ind].trainIdx].pt;
+          new_mapPoint->octave_match[currentframe->Get_KeyIndex()] = currentframe->Get_keyPoint()[good_matches[point_ind].queryIdx].octave;
+          new_mapPoint->octave_match[candidate_connected_frame->Get_KeyIndex()] = candidate_connected_frame->Get_keyPoint()[good_matches[point_ind].trainIdx].octave;
+          
           currentframe->Add_MapPoint(new_mapPoint);//현재 프레임에 맵포인트를 추가합니다.
           candidate_connected_frame->Add_MapPoint(new_mapPoint);//래퍼런스 프레임에 맵포인트를 추가합니다.
-          Cu_Re_Matches->CurrentFrame->_map_keyIdx2MapPointIdx[good_matches[point_ind].queryIdx] = _int_MapPointIdx;
-          Cu_Re_Matches->ReferenceFrame->_map_keyIdx2MapPointIdx[good_matches[point_ind].trainIdx] = _int_MapPointIdx;
+          
+          
+          currentframe->_map_keyIdx2MapPointIdx[good_matches[point_ind].queryIdx] = _int_MapPointIdx;
+          candidate_connected_frame->_map_keyIdx2MapPointIdx[good_matches[point_ind].trainIdx] = _int_MapPointIdx;
+          new_mapPoint->keypoint_match[currentframe->Get_KeyIndex()] = good_matches[point_ind].queryIdx;
+          new_mapPoint->keypoint_match[candidate_connected_frame->Get_KeyIndex()] = good_matches[point_ind].trainIdx;
           _int_MapPointIdx++;
         }
         else
         {
-          MapPoint* old_mapPoint =candidate_map_point[min_index];
+          try{
+          int mappoint_global_ind = candidate_connected_frame->_map_keyIdx2MapPointIdx[old_keyIdx];//현재 프레임에서 등록되어있습니다.
+          if(currentframe->_pmappoint_OwnedMapPoint.find(mappoint_global_ind) != currentframe->_pmappoint_OwnedMapPoint.end())
+          {
+            //이미 다른 프레임에 의해서 등록되었다면 넘어갑니다. 아니면 만약의 경우에는 현재 키프레임내에서 비슷하지만 다른 키포인트가
+            // 다른 프레임에서는 같은 키포인트에  매칭된걸수도 있습니다. 이를 막으면서 갑니다.
+            continue;
+          }
+          map<int,MapPoint*> mappoint_list = candidate_connected_frame->Get_MapPoint();
+
+          MapPoint* old_mapPoint =mappoint_list[mappoint_global_ind];//candidate_map_point[min_index];
+          
           old_mapPoint->view_count +=1;
-          // current_descriptors(Rect(0,i,32,1)).copyTo(new_mapPoint->mat_Orbdescriptor);
-          old_mapPoint->pixel_match[Cu_Re_Matches->CurrentFrame->Get_KeyIndex()] = currentframe->Get_keyPoint()[good_matches[point_ind].queryIdx].pt;
-          old_mapPoint->octave_match[Cu_Re_Matches->CurrentFrame->Get_KeyIndex()] = currentframe->Get_keyPoint()[good_matches[point_ind].queryIdx].octave;
+          old_mapPoint->pixel_match[currentframe->Get_KeyIndex()] = currentframe->Get_keyPoint()[good_matches[point_ind].queryIdx].pt;
+          old_mapPoint->octave_match[currentframe->Get_KeyIndex()] = currentframe->Get_keyPoint()[good_matches[point_ind].queryIdx].octave;
+          old_mapPoint->keypoint_match[currentframe->Get_KeyIndex()] = good_matches[point_ind].queryIdx;
+
           //현재 키프레임에 해당 맵포인트를 등록합니다. 
-          Cu_Re_Matches->CurrentFrame->_map_keyIdx2MapPointIdx[good_matches[point_ind].queryIdx] = Cu_Re_Matches->ReferenceFrame->_map_keyIdx2MapPointIdx[good_matches[point_ind].trainIdx];
+          currentframe->_map_keyIdx2MapPointIdx[good_matches[point_ind].queryIdx] = candidate_connected_frame->_map_keyIdx2MapPointIdx[good_matches[point_ind].trainIdx];
+          // cout<<"넣기직전"<<endl;
           currentframe->Add_MapPoint(old_mapPoint);
+          }
+          catch(exception& e)
+          {
+            cout<<e.what()<<endl;
+            // cout<<mappoint_global_ind<<endl;
+            cout<<candidate_connected_frame->_map_keyIdx2MapPointIdx.size()<<endl;
+            exit(0);
+          }
         }
       }
       if (matched_point !=0)
       {
         temp_local_keyframe.push_back(candidate_connected_frame);
-        cout<<"매치된 포인트는 "<<matched_point<<"개입니다."<<endl;
+        // cout<<"매치된 포인트는 "<<matched_point<<"개입니다."<<endl;
       }
     }
     temp_local_keyframe.push_back(Cu_Re_Matches->CurrentFrame);
@@ -400,6 +416,6 @@ void NodeHandler::Match_MapPoint(NewKeyFrameSet *Cu_Re_Matches, Mat camera_globa
   }
   this->_pt_LocalWindowKeyFrames.clear();
   this->_pt_LocalWindowKeyFrames = temp_local_keyframe;//로컬키프레임을 업데이트합니다. 
-  std::cout<<"현재 로컬 맵프레임 사이즈 : "<<_pt_LocalWindowKeyFrames.size()<<endl;
+  // std::cout<<"현재 로컬 맵프레임 사이즈 : "<<_pt_LocalWindowKeyFrames.size()<<endl;
   // cout<<"로컬윈도우를 업데이트합니다."<<endl;
 }

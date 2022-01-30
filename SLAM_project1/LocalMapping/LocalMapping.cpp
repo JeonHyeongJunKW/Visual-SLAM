@@ -26,28 +26,6 @@ void LocalMapping(NodeHandler &nodehandler)
         # < 3 step > < 2 step > 전에 유지하던 로컬 키프레임들(clone_past_localframe)의 맵포인트에 대해서 생성이후에 지난 시간(make_count)를             업데이트하고,   
                     이후에 보였는지(view_count)를 기반으로 하여 맵포인트를 삭제합니다. 논문에서는 처음삽입이후에 3번이상 보였는지를 기반으로 삭제하는듯 합니다. 추가적으로 필요한 변수가 있는지 알려주세요. 참고로 각 키프레임에서 _pmappoint_OwnedMapPoint라는 map<int, MapPoint*> 에 맵포인트들의 고유 인덱스가 key로, 맵포인트들의 포인터가 값으로 저장되어있어서, 맵포인트를 제거한다면 이 map 에서도 제거해줘야합니다. 
 
-                    키프레임 안에 맵포인트는 아래와 같이 얻어오고, 정보를 다음가 같이 접근가능합니다. 추가적인 변수는 KeyFrame.h에 선언되어있으니 확인바랍니다. 
-                    ex)
-                    Keyframe* target_frame; //맵포인트를 얻고자하는 타겟 키프레임의 포인터
-                    int key_Idx = target_frame->Get_KeyIndex(); // 키프레임의 고유 인덱스입니다. 
-                    map<int, MapPoint*> targetMapPoints = target_frame->Get_MapPoint();//타겟 맵포인트의 포인터를 값으로 얻어옵니다. 
-                    target_frame->_pmappoint_OwnedMapPoint; //직접적으로 접근하는 경우 왼쪽의 변수를 사용하여 접근하는 방식도 있습니다. 
-                    //map<int, MapPoint*> _pmappoint_OwnedMapPoint;//해당 키프레임이 가지고 있는 맵포인트들의 집합입니다. 포인터로 관리합니다. 
-                    for(auto mappoint=targetMapPoints.begin(); mappoint=targetMapPoints.end(); mappoint++)//원소별로 접근하여정보를 얻습니다. 
-                    {
-                        cout<<mappoint->second->view_count<<endl;//int형 변수, 현재 맵포인트가 키프레임들에 의해서 관측된 횟수를 나타냅니다.
-                                                                    // 초기값은 2입니다. 
-
-                        mappoint->second->make_count++;//int형 변수, 현재 맵포인트가 만들어진지 얼마나 지났는지를 나타냅니다.             
-                                                        //매 로컬매핑 주기마다 올려주어야합니다.
-
-                        cout<<mappoint->second->pixel_match[key_Idx]<<endl;//map<int,Point2d> pixel_match; 맵포인트가 
-                                                                            //키프레임마다 보이는 좌표입니다. 
-                                                                            //key는 각 키프레임의 고유 번호이며, 값은 각 키프레임에서
-                                                                            // 해당 맵포인트의 픽셀좌표입니다.(Point2d로 선언됨)
-
-                        cout<<mappoint->second->p3d_coordinate[<<endl;//Point3d p3d_coordinate; 로 선언되어있고, 맵포인트의 global 3차원좌표입니다.
-                    }
          # < 4 step > 컬링이 완료된 로컬 맵포인트들과 현재 키프레임에 대해서 관측된 맵포인트들과 키프레임들사이의 R,t관계를 구하고, 최적화합니다. 화이팅
         */
        
@@ -68,7 +46,7 @@ void LocalMapping(NodeHandler &nodehandler)
             double* R_t_scale;//13개의 외부 파라미터를 저장할 변수입니다. 
             newFrameSet->CurrentFrame->Get_Rt(R_t_scale);//현재 키프레임의 R,t,scale정보의 초기값을 얻어옵니다.(이전 프레임에 대한)
             Mat Extrinsic_matrix = R_t_scale_2_Mat(R_t_scale);//위에 함수에서 얻은 R,t,scale정보의 초기값을 행렬로 바꿔서 저장합니다.
-            cout<<"현재 R,t ("<<newFrameSet->CurrentFrame->Get_KeyIndex()<<")"<<endl;//현재 키프레임의 인덱스를 표시합니다. 
+            // cout<<"현재 R,t ("<<newFrameSet->CurrentFrame->Get_KeyIndex()<<")"<<endl;//현재 키프레임의 인덱스를 표시합니다. 
             
             estimated_pose = estimated_pose*Extrinsic_matrix.inv(); //카메라 외부 행렬의 역행렬로 global계에 대한 변환으로 현재 카메라 포즈를 업데이트합니다. 
 
@@ -86,11 +64,39 @@ void LocalMapping(NodeHandler &nodehandler)
             vector<KeyFrame*> clone_past_localframe = nodehandler._pt_LocalWindowKeyFrames;//임시로 로컬키프레임들을 저장합니다. 
             nodehandler.Match_MapPoint(newFrameSet,copyed_pose);//현재 추정된 전역 카메라 포즈(estimated_pose)와 새로운 프레임에 대한 정보를 
                                                                   //기반으로 맵포인트를 추가합니다. 
-
             //Todo 시작 
-            //# < 3 step > < 2 step > 전에 유지하던 로컬 키프레임들(clone_past_localframe)의 맵포인트에 대해서 생성이후에 지난 시간(make_count)를 업데이트하고,  이후에 보였는지(view_count)를 기반으로 하여 맵포인트를 삭제합니다. 논문에서는 처음삽입이후에 3번이상 보였는지를 기반으로 삭제하는듯 합니다. 추가적으로 필요한 변수가 있는지 알려주세요.
+            //# < 3 step > < 2 step > 전에 유지하던 로컬 키프레임들(clone_past_localframe)의 맵포인트에 대해서 생성이후에 지난 시간(make_count)를 업데이트하고,  
+            //이후에 보였는지(view_count)를 기반으로 하여 맵포인트를 삭제합니다. 논문에서는 처음삽입이후에 3번이상 보였는지를 기반으로 삭제하는듯 합니다. 추가적으로 필요한 변수가 있는지 알려주세요.
+            for(int i=0; i<clone_past_localframe.size(); i++)
+            {
+                KeyFrame* past_local_keyframe = clone_past_localframe[i];//로컬 키프레임을 얻어옵니다.
+                map<int, MapPoint*> past_map_point = past_local_keyframe->Get_MapPoint();//해당 키프레임의 맵포인트를 얻어옵니다. 
+                int k =0;
+                for(auto it_point = past_map_point.begin(); it_point !=past_map_point.end(); it_point++)
+                {
+                    int point_idx_global = it_point->first;//해당 맵포인트에 대한 전역 인덱스입니다.
+                    MapPoint* point_in_frame = it_point->second;//해당 맵포인트입니다. 
+                    
+                    if(point_in_frame->make_count +3 <newFrameSet->CurrentFrame->Get_KeyIndex() && point_in_frame->view_count <3)
+                    {//
+                        k++;
+                        //맵포인트에 대해서 가지고 있는 키프레임들을 하나씩 지웁니다. 
+                        map<int,int> key_matches = point_in_frame->keypoint_match;//맵포인트가 가지고 있는 키프레임 - 키포인트 인덱스관계입니다.
+                        for(auto key_match = key_matches.begin(); key_match !=key_matches.end(); key_match++)
+                        {
+                            int keyframe_idx = key_match->first;
+                            int keypoint_idx = key_match->second;
 
-
+                            //키프레임에서 해당 맵포인트를 지웁니다.
+                            nodehandler._pt_KeyFrames[keyframe_idx]->_pmappoint_OwnedMapPoint.erase(point_in_frame->int_Node);
+                            
+                            //키프레임에서 해당 키인덱스 와 맵포인트 사이의 인덱스 
+                            nodehandler._pt_KeyFrames[keyframe_idx]->_map_keyIdx2MapPointIdx.erase(keypoint_idx);
+                        }
+                    }
+                }
+            }
+            //# < 4 step > 컬링이 완료된 로컬 맵포인트들과 현재 키프레임에 대해서 관측된 맵포인트들과 키프레임들사이의 R,t관계를 구하고, 최적화합니다. 화이팅
 
 
 

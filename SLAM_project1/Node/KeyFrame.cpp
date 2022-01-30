@@ -84,6 +84,15 @@ int KeyFrame::Get_NumMapPoint()
 
 void KeyFrame::Add_MapPoint(MapPoint* arg_MapPoint)
 {
+  if(this->_pmappoint_OwnedMapPoint.find(arg_MapPoint->int_Node) != this->_pmappoint_OwnedMapPoint.end())
+  {
+    cout<<"already have error4"<<endl;
+    cout<<arg_MapPoint->int_Node<<endl;
+    cout<<this->Get_KeyIndex()<<endl;
+    cout<<this->_pmappoint_OwnedMapPoint[arg_MapPoint->int_Node]->int_Node<<endl;
+    exit(0);
+  }
+  else
   this->_pmappoint_OwnedMapPoint[arg_MapPoint->int_Node] = arg_MapPoint;//노드 이름으로 저장됩니다. 
 }
 

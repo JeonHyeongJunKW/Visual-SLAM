@@ -6,6 +6,11 @@
 #include "math.h"
 using namespace std;
 using namespace cv;
+void Optimize_localmap( vector<map_point_kch> &MapPointSet, map<int,key_frame_kch> &keyFrameSet)
+{
+    //찬혁이가 해야하는 부분
+    //로컬 키프레임 내에 존재하는 맵포인트와 키프레임입니다. 맵포인트의 관측을 통해서 최적화 식을 만들어야합니다. 
+}
 
 void LocalMapping(NodeHandler &nodehandler)
 {
@@ -19,8 +24,8 @@ void LocalMapping(NodeHandler &nodehandler)
         /* 이 아래는 로컬 맵핑부분입니다. 다음과같은 순서로 이루어집니다. 
         # < 1 step > tracking 부분에서 전달해준, 초기 R,t를 이용하여, 전역 R,t를 업데이트합니다. 현재 키프레임에도 전역 R,t를 등록합니다. 
 
-        # < 2 step > 현재 키프레임을 로컬 키프레임에 추가하면서 맵포인트를 초기 연결을 시켜줍니다. 이때, 맵포인트 점들의 투영간에 정보를 
-                    활용하여 매칭합니다. (로컬 키프레임들은 vector<KeyFrame*> nodehandler._pt_LocalWindowKeyFrames
+        # < 2 step > 현재 키프레임void Get_OptimizeSet(vector<KeyFrame*> past_localframe, vector<map_point_kch> &InitialMapPointSet, map<int,key_frame_kch> &InitialkeyFrameSet);
+void Set_OptimizeSet(vector<KeyFrame*> &past_localframe, vector<map_point_kch> InitialMapPointSet, map<int,key_frame_kch> InitialkeyFrameSet);합니다. (로컬 키프레임들은 vector<KeyFrame*> nodehandler._pt_LocalWindowKeyFrames
                     안에 포인터의 형태로 저장되어있음)
 
         # < 3 step > < 2 step > 전에 유지하던 로컬 키프레임들(clone_past_localframe)의 맵포인트에 대해서 생성이후에 지난 시간(make_count)를             업데이트하고,   
@@ -87,7 +92,6 @@ void LocalMapping(NodeHandler &nodehandler)
                             int keyframe_idx = key_match->first;
                             int keypoint_idx = key_match->second;
 
-                            //키프레임에서 해당 맵포인트를 지웁니다.
                             nodehandler._pt_KeyFrames[keyframe_idx]->_pmappoint_OwnedMapPoint.erase(point_in_frame->int_Node);
                             
                             //키프레임에서 해당 키인덱스 와 맵포인트 사이의 인덱스 
@@ -97,22 +101,12 @@ void LocalMapping(NodeHandler &nodehandler)
                 }
             }
             //# < 4 step > 컬링이 완료된 로컬 맵포인트들과 현재 키프레임에 대해서 관측된 맵포인트들과 키프레임들사이의 R,t관계를 구하고, 최적화합니다. 화이팅
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+            vector<map_point_kch> InitialMapPointSet;
+            map<int,key_frame_kch> InitialkeyFrameSet;
+            Get_OptimizeSet(nodehandler._pt_LocalWindowKeyFrames, InitialMapPointSet,InitialkeyFrameSet);//초기 매칭할 수 있는 형태로 변화시켜줍니다. 
+            Optimize_localmap(InitialMapPointSet,InitialkeyFrameSet);
+            Set_OptimizeSet(nodehandler._pt_LocalWindowKeyFrames, InitialMapPointSet,InitialkeyFrameSet);//최적화된 키프레임과 맵포인트를 반영합니다. 
+            //실제 반영하는 코드도 만들어야합니다. 
             nodehandler.v_newKeyFrame.erase(nodehandler.v_newKeyFrame.begin());//현재 키프레임 후보에서 방금 처리한 키프레임을 없앱니다. 
             nodehandler.estimated_pose.push_back(estimated_pose);//(그리는용도) 현재 추정된 위치를 그립니다. 
             //--실제 업데이트하는 부분 끝
@@ -149,4 +143,12 @@ Mat R_t_scale_2_Mat(double* R_t_scale)
               R_t_scale[8],R_t_scale[9],R_t_scale[10],R_t_scale[11],
                         0.,          0.,           0.,R_t_scale[12]);
     return Extrinsic_matrix;
+}
+void Get_OptimizeSet(vector<KeyFrame*> past_localframe, vector<map_point_kch> &InitialMapPointSet, map<int,key_frame_kch> &InitialkeyFrameSet)
+{
+
+}
+void Set_OptimizeSet(vector<KeyFrame*> &past_localframe, vector<map_point_kch> InitialMapPointSet, map<int,key_frame_kch> InitialkeyFrameSet)
+{
+
 }

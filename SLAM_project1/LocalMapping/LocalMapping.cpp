@@ -48,6 +48,10 @@ void Set_OptimizeSet(vector<KeyFrame*> &past_localframe, vector<map_point_kch> I
                 
                 newFrameSet->ReferenceFrame->global_pose = copyed_ref_pose;//0번째 프레임에 대한 카메라 포즈를 저장합니다. 
             }
+            else
+            {
+                nodehandler._pt_LocalWindowKeyFrames.back()->global_pose.copyTo(estimated_pose);
+            }
             double* R_t_scale;//13개의 외부 파라미터를 저장할 변수입니다. 
             newFrameSet->CurrentFrame->Get_Rt(R_t_scale);//현재 키프레임의 R,t,scale정보의 초기값을 얻어옵니다.(이전 프레임에 대한)
             Mat Extrinsic_matrix = R_t_scale_2_Mat(R_t_scale);//위에 함수에서 얻은 R,t,scale정보의 초기값을 행렬로 바꿔서 저장합니다.
@@ -103,9 +107,15 @@ void Set_OptimizeSet(vector<KeyFrame*> &past_localframe, vector<map_point_kch> I
             //# < 4 step > 컬링이 완료된 로컬 맵포인트들과 현재 키프레임에 대해서 관측된 맵포인트들과 키프레임들사이의 R,t관계를 구하고, 최적화합니다. 화이팅
             vector<map_point_kch> InitialMapPointSet;
             map<int,key_frame_kch> InitialkeyFrameSet;
+            
+ 
             Get_OptimizeSet(nodehandler._pt_LocalWindowKeyFrames, InitialMapPointSet,InitialkeyFrameSet);//초기 매칭할 수 있는 형태로 변화시켜줍니다. 
             Optimize_localmap(InitialMapPointSet,InitialkeyFrameSet);
+            
             Set_OptimizeSet(nodehandler._pt_LocalWindowKeyFrames, InitialMapPointSet,InitialkeyFrameSet);//최적화된 키프레임과 맵포인트를 반영합니다. 
+            
+ 
+            
             //실제 반영하는 코드도 만들어야합니다. 
             nodehandler.v_newKeyFrame.erase(nodehandler.v_newKeyFrame.begin());//현재 키프레임 후보에서 방금 처리한 키프레임을 없앱니다. 
             nodehandler.estimated_pose.push_back(estimated_pose);//(그리는용도) 현재 추정된 위치를 그립니다. 
@@ -147,8 +157,112 @@ Mat R_t_scale_2_Mat(double* R_t_scale)
 void Get_OptimizeSet(vector<KeyFrame*> past_localframe, vector<map_point_kch> &InitialMapPointSet, map<int,key_frame_kch> &InitialkeyFrameSet)
 {
 
+
+    vector<int> localKeyFrameIdx; 
+    for(int frame_ind = 0; frame_ind <past_localframe.size(); frame_ind++)
+    {
+        localKeyFrameIdx.push_back(past_localframe[frame_ind]->Get_KeyIndex());
+    }
+    vector<int> local_mappoint_idx;
+    map<int, map_point_kch*> local_mappoint_saved;
+    for(int reverse_frame_ind = past_localframe.size()-1; reverse_frame_ind >=0;reverse_frame_ind--)
+    {//맨마지막에 있는 프레임부터 관계되어있는것을 하나둘 씩 미리 맵포인트를 만들어둡니다. 
+        KeyFrame* revFrame = past_localframe[reverse_frame_ind];
+        key_frame_kch newFrame;
+        newFrame.frameNumber = revFrame->Get_KeyIndex();//초기 프레임번호를 초기화합니다.
+        Mat globalpose = revFrame->global_pose;
+        double x,y,z;
+        x = globalpose.at<double>(0,3);
+        y = globalpose.at<double>(1,3);
+        z = globalpose.at<double>(2,3);
+        newFrame.world_x_y_z = Point3d(x,y,z); //위치를 세팅합니다.
+        Mat R;//글로벌방위를 담을 배열입니다.
+        globalpose(Rect(0,0,3,3)).copyTo(R);//전역위치에서 글로벌 방위로 변환합니다.
+        Mat rod_R(3,1,CV_64FC1);
+        Rodrigues(R,rod_R);//로드리게스형으로 저장합니다.        
+        newFrame.view_point = Point3d(rod_R.at<double>(0,0),rod_R.at<double>(0,1),rod_R.at<double>(0,2)); //방위를 초기화합니다.
+        
+
+        map<int,MapPoint*> have_mapset = revFrame->Get_MapPoint();//전역 맵포인트 인덱스(key)로 맵포인트의 포인터(value)를 가져옵니다.
+        map<int,int> map_localIdx = revFrame->_map_keyIdx2MapPointIdx;//키프레임 내에서의 인덱스(key)를 전역 맵포인트 인덱스(value)으로 바꿉니다.
+        
+        for(auto idx = map_localIdx.begin(); idx != map_localIdx.end(); idx++)
+        {
+            int local_idx = idx->first;//지역 인덱스
+            int global_idx = idx->second;//global Idx
+            MapPoint* global_mapPoint = have_mapset[global_idx];
+            bool isHave = find(local_mappoint_idx.begin(),local_mappoint_idx.end(),global_idx)==local_mappoint_idx.end();
+            
+            if(isHave)
+            {//해당 맵포인트가 아직 없다면
+                map_point_kch* new_mappoint = new map_point_kch;
+                new_mappoint->mappointNumber = global_idx;//전역 인덱스
+                new_mappoint->world_x_y_z =  global_mapPoint->p3d_coordinate;//3차원 좌표
+                local_mappoint_saved[global_idx] = new_mappoint;
+                local_mappoint_idx.push_back(global_idx);
+                //현재키프레임에 해당하는 정보를 추가합니다.
+                new_mappoint->frame2idx[newFrame.frameNumber] = local_idx;//특정 프레임(key)에서 이 맵포인트의 인덱스(value) 입니다. 
+                newFrame.idx2Point2d[local_idx] = global_mapPoint->pixel_match[newFrame.frameNumber];
+            }
+            else
+            {//해당맵포인트가 있다면
+                map_point_kch* copyed_mappoint = local_mappoint_saved[global_idx];
+                //현재키프레임에 해당하는 정보를 추가합니다.
+                copyed_mappoint->frame2idx[newFrame.frameNumber] = local_idx;//특정 프레임(key)에서 이 맵포인트의 인덱스(value) 입니다. 
+                newFrame.idx2Point2d[local_idx] = global_mapPoint->pixel_match[newFrame.frameNumber];
+            }
+        }
+        InitialkeyFrameSet[revFrame->Get_KeyIndex()] = newFrame;//해당 로컬키프레임을 최적화를 위한 프레임으로 저장합니다.
+    }
+    std::transform(local_mappoint_saved.begin(),local_mappoint_saved.end(),std::back_inserter(InitialMapPointSet),[](auto &kv){return *(kv.second);});
+    // cout<<InitialMapPointSet.size()<<endl;
 }
 void Set_OptimizeSet(vector<KeyFrame*> &past_localframe, vector<map_point_kch> InitialMapPointSet, map<int,key_frame_kch> InitialkeyFrameSet)
 {
+    map<int, map_point_kch> local_mappoint_saved;
+    for(int i=0; i <InitialMapPointSet.size(); i++)
+    {
+        map_point_kch check_mapPoint = InitialMapPointSet[i];
+        local_mappoint_saved[check_mapPoint.mappointNumber] = check_mapPoint;
+    }
+    vector<int> already_checked_mapPoint;
 
+    for(int i=0; i<past_localframe.size(); i++)
+    {
+        KeyFrame* pFrame = past_localframe[i];
+        key_frame_kch nFrame = InitialkeyFrameSet[pFrame->Get_KeyIndex()];//새롭게 수정된프레임
+        Point3d new_ViewPoint =nFrame.view_point;
+        Point3d new_World_x_y_z =nFrame.world_x_y_z;
+        Mat R(3,3,CV_64FC1);
+        Mat rod_R(3,1,CV_64FC1);
+        Mat NewGlobalPose= Mat::zeros(4,4,CV_64FC1);
+        rod_R.at<double>(0,0) = new_ViewPoint.x;
+        rod_R.at<double>(1,0) = new_ViewPoint.y;
+        rod_R.at<double>(2,0) = new_ViewPoint.z;
+        Rodrigues(rod_R,R);
+        R.copyTo(NewGlobalPose(Rect(0,0,3,3)));
+        NewGlobalPose.at<double>(0,3) = new_World_x_y_z.x;
+        NewGlobalPose.at<double>(1,3) = new_World_x_y_z.y;
+        NewGlobalPose.at<double>(2,3) = new_World_x_y_z.z;
+        NewGlobalPose.at<double>(3,3) = 1.0;
+        pFrame->global_pose = NewGlobalPose;
+        map<int,MapPoint*> origin_mappoint = pFrame->_pmappoint_OwnedMapPoint;
+        for(auto mp = origin_mappoint.begin(); mp !=origin_mappoint.end(); mp++)
+        {
+            int mp_idx = mp->first;
+            MapPoint* changed_mp = mp->second;
+            
+            bool isNewPoint = find(already_checked_mapPoint.begin(),already_checked_mapPoint.end(),mp_idx) ==already_checked_mapPoint.end();//이부분은 수정할것
+            if(isNewPoint)
+            {
+                already_checked_mapPoint.push_back(mp_idx);
+                map_point_kch NewMappoint = local_mappoint_saved[mp_idx];
+                changed_mp->p3d_coordinate = NewMappoint.world_x_y_z;
+            }
+            else
+            {
+                continue;
+            }
+        }
+    }
 }

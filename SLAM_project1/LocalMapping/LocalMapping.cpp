@@ -191,9 +191,19 @@ void Get_OptimizeSet(vector<KeyFrame*> past_localframe, vector<map_point_kch> &I
             int local_idx = idx->first;//지역 인덱스
             int global_idx = idx->second;//global Idx
             MapPoint* global_mapPoint = have_mapset[global_idx];
-            bool isHave = find(local_mappoint_idx.begin(),local_mappoint_idx.end(),global_idx)==local_mappoint_idx.end();
+            bool isHave;
+            if(global_mapPoint->already_checked ==0)//아직검사전
+            {
+                isHave = false;
+                global_mapPoint->already_checked=1;
+                
+            }
+            else
+            {
+                isHave = true;
+            }
             
-            if(isHave)
+            if(!isHave)
             {//해당 맵포인트가 아직 없다면
                 map_point_kch* new_mappoint = new map_point_kch;
                 new_mappoint->mappointNumber = global_idx;//전역 인덱스
@@ -225,7 +235,6 @@ void Set_OptimizeSet(vector<KeyFrame*> &past_localframe, vector<map_point_kch> I
         map_point_kch check_mapPoint = InitialMapPointSet[i];
         local_mappoint_saved[check_mapPoint.mappointNumber] = check_mapPoint;
     }
-    vector<int> already_checked_mapPoint;
 
     for(int i=0; i<past_localframe.size(); i++)
     {
@@ -252,12 +261,21 @@ void Set_OptimizeSet(vector<KeyFrame*> &past_localframe, vector<map_point_kch> I
             int mp_idx = mp->first;
             MapPoint* changed_mp = mp->second;
             
-            bool isNewPoint = find(already_checked_mapPoint.begin(),already_checked_mapPoint.end(),mp_idx) ==already_checked_mapPoint.end();//이부분은 수정할것
+            bool isNewPoint;//이부분은 수정할것
+            if(changed_mp->already_checked ==1)
+            {
+                isNewPoint = true;
+                
+            }
+            else
+            {
+                isNewPoint = false;
+            }
             if(isNewPoint)
             {
-                already_checked_mapPoint.push_back(mp_idx);
                 map_point_kch NewMappoint = local_mappoint_saved[mp_idx];
                 changed_mp->p3d_coordinate = NewMappoint.world_x_y_z;
+                changed_mp->already_checked=0;
             }
             else
             {

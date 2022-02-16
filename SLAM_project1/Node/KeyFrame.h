@@ -30,6 +30,7 @@ class MapPoint
     map<int,int> octave_match;//각 키프레임에서 보이는 옥타브정보 
     map<int,int> keypoint_match;//각 키프레임에서 보이는 키포인트 인덱스 정보
     int int_Node = 0;//노드의 이름 
+    int already_checked = 0;// 해당 노드가 이미 최적화되었는지 검사하는 요소 0이면 최적화 과정전, 1이면 최적화 됨
 };
 
 class KeyFrame
